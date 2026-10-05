@@ -21,3 +21,6 @@ export const deleteTenantProduct = (tenantDomain, productId) => {
 export const getTenantProduct = (tenantDomain, productId) => {
   return api.get(`/${tenantDomain}/products/${productId}`);
 };
+
+export const activateTenantProduct = (tenantDomain, productId) =>
+  api.patch(`/${tenantDomain}/products/${productId}/activate`);

@@ -7,11 +7,13 @@ import {
   faPen,
   faPlus,
   faTrash,
+  faRotateLeft
 } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../../context/AuthContext";
 import {
   getTenantProducts,
   deleteTenantProduct,
+  activateTenantProduct,
 } from "../../services/tenantProductService";
 import "./TenantProducts.css";
 
@@ -24,6 +26,7 @@ function TenantProducts() {
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [activatingId, setActivatingId] = useState(null);
 
   const loadProducts = async () => {
     if (!tenantDomain) {
@@ -76,6 +79,27 @@ function TenantProducts() {
       setError(error.response?.data?.message || "Failed to delete product.");
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleActivate = async (product) => {
+    try {
+      setActivatingId(product.id);
+      setError("");
+
+      const response = await activateTenantProduct(tenantDomain, product.id);
+
+      setProducts((currentProducts) =>
+        currentProducts.map((currentProduct) =>
+          currentProduct.id === product.id ? response.data : currentProduct,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to activate product:", error);
+
+      setError(error.response?.data?.message || "Failed to activate product.");
+    } finally {
+      setActivatingId(null);
     }
   };
 
@@ -222,15 +246,29 @@ function TenantProducts() {
                     Edit
                   </Link>
 
-                  <button
-                    type="button"
-                    className="tenant-product-delete-button"
-                    onClick={() => handleDelete(product)}
-                    disabled={deletingId === product.id}
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                    {deletingId === product.id ? "Deleting..." : "Delete"}
-                  </button>
+                  {product.active ? (
+                    <button
+                      type="button"
+                      className="tenant-product-delete-button"
+                      onClick={() => handleDelete(product)}
+                      disabled={deletingId === product.id}
+                    >
+                      <FontAwesomeIcon icon={faTrash} />
+                      {deletingId === product.id ? "Deleting..." : "Deactivate"}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="tenant-product-activate-button"
+                      onClick={() => handleActivate(product)}
+                      disabled={activatingId === product.id}
+                    >
+                      <FontAwesomeIcon icon={faRotateLeft} />
+                      {activatingId === product.id
+                        ? "Activating..."
+                        : "Activate"}
+                    </button>
+                  )}
                 </div>
               </article>
             );

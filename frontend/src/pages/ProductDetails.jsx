@@ -10,6 +10,7 @@ import {
   faBoxOpen,
 } from "@fortawesome/free-solid-svg-icons";
 
+
 import { getProduct } from "../services/productService";
 
 import {

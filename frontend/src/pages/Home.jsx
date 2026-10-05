@@ -11,9 +11,11 @@ import { getProducts } from "../services/productService";
 import { getCategories } from "../services/categoryService";
 import ProductCard from "../components/ProductCard/ProductCard";
 import "./Home.css";
+import { useAuth } from "../context/AuthContext";
 
 function Home() {
   const navigate = useNavigate();
+  const {authenticated,user} = useAuth();
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -85,9 +87,19 @@ function Home() {
           </p>
 
           <h1>
-            Find products
-            <br />
-            you'll love.
+            {authenticated && user?.username ? (
+              <>
+                Welcome back,
+                <br />
+                {user.username}.
+              </>
+            ) : (
+              <>
+                Find products
+                <br />
+                you'll love.
+              </>
+            )}
           </h1>
 
           <p className="home-hero-description">

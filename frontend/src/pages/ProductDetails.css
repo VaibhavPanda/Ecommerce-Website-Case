@@ -10,34 +10,42 @@
   transition: color 0.35s ease;
 }
 
+
+
 /* =========================================================
    BACK LINK
    ========================================================= */
 
-.back-link {
+.product-details-back {
   display: inline-flex;
   align-items: center;
-
   gap: 8px;
 
   margin-bottom: 24px;
 
   color: var(--text-secondary);
-
   font-size: 14px;
   font-weight: 500;
 
   text-decoration: none;
 
   transition:
-    color 0.2s ease;
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
-.back-link:hover {
+.product-details-back:hover {
   color: var(--text-primary);
+  transform: translateX(-2px);
 }
 
-.back-link svg {
+.product-details-back:focus-visible {
+  outline: 2px solid var(--input-border-focus);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.product-details-back svg {
   font-size: 12px;
 }
 
