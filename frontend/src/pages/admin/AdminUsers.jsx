@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBuilding,
@@ -9,6 +10,7 @@ import {
   faUserShield,
   faUsers,
   faXmark,
+  faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -206,6 +208,11 @@ function AdminUsers() {
     <main className="admin-users-page">
       <header className="admin-users-header">
         <div>
+          <Link to="/admin/dashboard" className="admin-users-back-link">
+            <FontAwesomeIcon icon={faArrowLeft} />
+            <span>Back to Dashboard</span>
+          </Link>
+
           <p className="admin-users-eyebrow">
             <FontAwesomeIcon icon={faUserShield} />
             ADMINISTRATION

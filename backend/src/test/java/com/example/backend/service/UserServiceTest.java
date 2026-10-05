@@ -1,330 +1,409 @@
-// package com.example.backend.service;
-
-// import static org.junit.jupiter.api.Assertions.*;
-// import static org.mockito.ArgumentMatchers.*;
-// import static org.mockito.Mockito.*;
-
-// import java.util.List;
-// import java.util.Optional;
-
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.api.extension.ExtendWith;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.junit.jupiter.MockitoExtension;
-
-// import com.example.backend.entity.Role;
-// import com.example.backend.entity.Tenant;
-// import com.example.backend.entity.User;
-// import com.example.backend.exception.ResourceAlreadyExistsException;
-// import com.example.backend.exception.ResourceNotFoundException;
-// import com.example.backend.repository.UserRepository;
-
-// @ExtendWith(MockitoExtension.class)
-// class UserServiceTest {
-
-//   @Mock
-//   private UserRepository userRepository;
-
-//   @Mock
-//   private TenantService tenantService;
-
-//   @Mock
-//   private RoleService roleService;
-
-//   @InjectMocks
-//   private UserService userService;
-
-//   private User user;
-//   private Tenant tenant;
-//   private Role role;
-
-//   @BeforeEach
-//   void setUp() {
-
-//     tenant = new Tenant();
-//     tenant.setId(1L);
-//     tenant.setName("Nike");
-//     tenant.setDomain("nike");
-
-//     role = new Role();
-//     role.setId(1L);
-//     role.setName("USER");
-
-//     user = new User();
-//     user.setId(100L);
-//     user.setUsername("nikeuser");
-//     user.setEmail("nikeuser@gmail.com");
-//     user.setKeycloakUserId("keycloak-123");
-//     user.setTenant(tenant);
-//     user.setRole(role);
-//   }
-
-//   // Test retrieving a user by username
-//   @Test
-//   void shouldGetUserByUsernameSuccessfully() {
-
-//     when(userRepository.findByUsername("nikeuser"))
-//         .thenReturn(Optional.of(user));
-
-//     User result = userService.getUserByUsername("nikeuser");
-
-//     assertNotNull(result);
-//     assertEquals("nikeuser", result.getUsername());
-//     assertEquals("nikeuser@gmail.com", result.getEmail());
-
-//     verify(userRepository)
-//         .findByUsername("nikeuser");
-//   }
-
-//   // Test user not found when searching by username
-//   @Test
-//   void shouldThrowExceptionWhenUsernameDoesNotExist() {
-
-//     when(userRepository.findByUsername("unknown"))
-//         .thenReturn(Optional.empty());
-
-//     assertThrows(
-//         ResourceNotFoundException.class,
-//         () -> userService.getUserByUsername("unknown"));
-//   }
-
-//   // Test retrieving a user by Keycloak user ID
-//   @Test
-//   void shouldGetUserByKeycloakUserIdSuccessfully() {
-
-//     when(userRepository.findByKeycloakUserId("keycloak-123"))
-//         .thenReturn(Optional.of(user));
-
-//     User result = userService.getUserByKeycloakUserId("keycloak-123");
-
-//     assertNotNull(result);
-//     assertEquals("keycloak-123", result.getKeycloakUserId());
-//     assertEquals("nikeuser", result.getUsername());
-
-//     verify(userRepository)
-//         .findByKeycloakUserId("keycloak-123");
-//   }
-
-//   // Test user not found when searching by Keycloak ID
-//   @Test
-//   void shouldThrowExceptionWhenKeycloakUserDoesNotExist() {
-
-//     when(userRepository.findByKeycloakUserId("unknown-id"))
-//         .thenReturn(Optional.empty());
-
-//     assertThrows(
-//         ResourceNotFoundException.class,
-//         () -> userService.getUserByKeycloakUserId("unknown-id"));
-//   }
-
-//   // Test retrieving all users belonging to a tenant
-//   @Test
-//   void shouldGetUsersByTenantSuccessfully() {
-
-//     when(tenantService.getTenantByDomain("nike"))
-//         .thenReturn(tenant);
-
-//     when(userRepository.findByTenant(tenant))
-//         .thenReturn(List.of(user));
-
-//     List<User> result = userService.getUsersByTenant("nike");
-
-//     assertNotNull(result);
-//     assertEquals(1, result.size());
-//     assertEquals("nikeuser", result.get(0).getUsername());
-
-//     verify(tenantService)
-//         .getTenantByDomain("nike");
-
-//     verify(userRepository)
-//         .findByTenant(tenant);
-//   }
-
-//   // Test successful application user creation
-//   @Test
-//   void shouldCreateApplicationUserSuccessfully() {
-
-//     when(userRepository.existsByUsername("nikeuser"))
-//         .thenReturn(false);
-
-//     when(userRepository.existsByEmail("nikeuser@gmail.com"))
-//         .thenReturn(false);
-
-//     when(tenantService.getTenantByDomain("nike"))
-//         .thenReturn(tenant);
-
-//     when(roleService.getRoleByName("USER"))
-//         .thenReturn(role);
-
-//     when(userRepository.save(any(User.class)))
-//         .thenReturn(user);
-
-//     User result = userService.createApplicationUser(
-//         "nikeuser",
-//         "nikeuser@gmail.com",
-//         "keycloak-123",
-//         "nike",
-//         "USER");
-
-//     assertNotNull(result);
-//     assertEquals("nikeuser", result.getUsername());
-//     assertEquals("nikeuser@gmail.com", result.getEmail());
-//     assertEquals("keycloak-123", result.getKeycloakUserId());
-//     assertEquals(tenant, result.getTenant());
-//     assertEquals(role, result.getRole());
-
-//     verify(userRepository)
-//         .save(any(User.class));
-//   }
-
-//   // Test duplicate username rejection
-//   @Test
-//   void shouldThrowExceptionWhenUsernameAlreadyExists() {
-
-//     when(userRepository.existsByUsername("nikeuser"))
-//         .thenReturn(true);
-
-//     assertThrows(
-//         ResourceAlreadyExistsException.class,
-//         () -> userService.createApplicationUser(
-//             "nikeuser",
-//             "nikeuser@gmail.com",
-//             "keycloak-123",
-//             "nike",
-//             "USER"));
-
-//     verify(userRepository, never())
-//         .save(any(User.class));
-
-//     verify(userRepository, never())
-//         .existsByEmail(anyString());
-//   }
-
-//   // Test duplicate email rejection
-//   @Test
-//   void shouldThrowExceptionWhenEmailAlreadyExists() {
-
-//     when(userRepository.existsByUsername("nikeuser"))
-//         .thenReturn(false);
-
-//     when(userRepository.existsByEmail("nikeuser@gmail.com"))
-//         .thenReturn(true);
-
-//     assertThrows(
-//         ResourceAlreadyExistsException.class,
-//         () -> userService.createApplicationUser(
-//             "nikeuser",
-//             "nikeuser@gmail.com",
-//             "keycloak-123",
-//             "nike",
-//             "USER"));
-
-//     verify(userRepository, never())
-//         .save(any(User.class));
-//   }
-
-//   // Test creating a user without a tenant
-//   @Test
-//   void shouldCreateApplicationUserWithoutTenantSuccessfully() {
-
-//     when(userRepository.existsByUsername("normaluser"))
-//         .thenReturn(false);
-
-//     when(userRepository.existsByEmail("normaluser@gmail.com"))
-//         .thenReturn(false);
-
-//     when(roleService.getRoleByName("USER"))
-//         .thenReturn(role);
-
-//     User userWithoutTenant = new User();
-//     userWithoutTenant.setId(200L);
-//     userWithoutTenant.setUsername("normaluser");
-//     userWithoutTenant.setEmail("normaluser@gmail.com");
-//     userWithoutTenant.setKeycloakUserId("keycloak-456");
-//     userWithoutTenant.setTenant(null);
-//     userWithoutTenant.setRole(role);
-
-//     when(userRepository.save(any(User.class)))
-//         .thenReturn(userWithoutTenant);
-
-//     User result = userService.createApplicationUser(
-//         "normaluser",
-//         "normaluser@gmail.com",
-//         "keycloak-456",
-//         null,
-//         "USER");
-
-//     assertNotNull(result);
-//     assertEquals("normaluser", result.getUsername());
-//     assertNull(result.getTenant());
-//     assertEquals(role, result.getRole());
-
-//     verify(tenantService, never())
-//         .getTenantByDomain(anyString());
-
-//     verify(userRepository)
-//         .save(any(User.class));
-//   }
-
-//   // Test that the correct tenant is assigned during user creation
-//   @Test
-//   void shouldAssignCorrectTenantToUser() {
-
-//     when(userRepository.existsByUsername("nikeuser"))
-//         .thenReturn(false);
-
-//     when(userRepository.existsByEmail("nikeuser@gmail.com"))
-//         .thenReturn(false);
-
-//     when(tenantService.getTenantByDomain("nike"))
-//         .thenReturn(tenant);
-
-//     when(roleService.getRoleByName("USER"))
-//         .thenReturn(role);
-
-//     when(userRepository.save(any(User.class)))
-//         .thenAnswer(invocation -> invocation.getArgument(0));
-
-//     User result = userService.createApplicationUser(
-//         "nikeuser",
-//         "nikeuser@gmail.com",
-//         "keycloak-123",
-//         "nike",
-//         "USER");
-
-//     assertNotNull(result.getTenant());
-//     assertEquals("nike", result.getTenant().getDomain());
-//   }
-
-//   // Test that the correct role is assigned during user creation
-//   @Test
-//   void shouldAssignCorrectRoleToUser() {
-
-//     when(userRepository.existsByUsername("nikeuser"))
-//         .thenReturn(false);
-
-//     when(userRepository.existsByEmail("nikeuser@gmail.com"))
-//         .thenReturn(false);
-
-//     when(tenantService.getTenantByDomain("nike"))
-//         .thenReturn(tenant);
-
-//     when(roleService.getRoleByName("USER"))
-//         .thenReturn(role);
-
-//     when(userRepository.save(any(User.class)))
-//         .thenAnswer(invocation -> invocation.getArgument(0));
-
-//     User result = userService.createApplicationUser(
-//         "nikeuser",
-//         "nikeuser@gmail.com",
-//         "keycloak-123",
-//         "nike",
-//         "USER");
-
-//     assertNotNull(result.getRole());
-//     assertEquals("USER", result.getRole().getName());
-//   }
-// }
+package com.example.backend.service;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.example.backend.entity.*;
+import com.example.backend.exception.*;
+import com.example.backend.repository.UserRepository;
+import com.example.backend.security.KeycloakAdminService;
+
+@ExtendWith(MockitoExtension.class)
+class UserServiceUnitTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private TenantService tenantService;
+
+    @Mock
+    private RoleService roleService;
+
+    @Mock
+    private KeycloakAdminService keycloakAdminService;
+
+    @InjectMocks
+    private UserService service;
+
+    private Role userRole() {
+        return new Role(1L, "USER");
+    }
+
+    private Role tenantRole() {
+        return new Role(2L, "TENANT");
+    }
+
+    private User user() {
+        return new User(
+                1L,
+                "john",
+                "john@x.com",
+                "kc-1",
+                null,
+                userRole()
+        );
+    }
+
+    private Tenant tenant() {
+        return new Tenant(
+                5L,
+                "Nike",
+                "nike",
+                true
+        );
+    }
+
+    @Test
+    void createApplicationUser_userSuccess() {
+
+      when(userRepository
+          .existsByUsername("john"))
+          .thenReturn(false);
+
+      when(userRepository
+          .existsByEmail("john@x.com"))
+          .thenReturn(false);
+
+      when(roleService
+          .getRoleByName("USER"))
+          .thenReturn(userRole());
+
+      when(userRepository
+          .save(any(User.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      var result = service.createApplicationUser(
+          "john",
+          "john@x.com",
+          "kc",
+          null,
+          "USER");
+
+      assertEquals(
+          "john",
+          result.getUsername());
+
+      assertEquals(
+          "USER",
+          result.getRole());
+    }
+
+    @Test
+    void createApplicationUser_duplicateUsername() {
+
+        when(userRepository
+                .existsByUsername("john"))
+                .thenReturn(true);
+
+        assertThrows(
+                ResourceAlreadyExistsException.class,
+                () -> service.createApplicationUser(
+                        "john",
+                        "x",
+                        "kc",
+                        null,
+                        "USER"
+                )
+        );
+    }
+
+    @Test
+    void createApplicationUser_duplicateEmail() {
+
+        when(userRepository
+                .existsByUsername("john"))
+                .thenReturn(false);
+
+        when(userRepository
+                .existsByEmail("x"))
+                .thenReturn(true);
+
+        assertThrows(
+                ResourceAlreadyExistsException.class,
+                () -> service.createApplicationUser(
+                        "john",
+                        "x",
+                        "kc",
+                        null,
+                        "USER"
+                )
+        );
+    }
+
+    @Test
+    void createApplicationUser_invalidRole() {
+
+        when(userRepository
+                .existsByUsername("john"))
+                .thenReturn(false);
+
+        when(userRepository
+                .existsByEmail("x"))
+                .thenReturn(false);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.createApplicationUser(
+                        "john",
+                        "x",
+                        "kc",
+                        null,
+                        "MANAGER"
+                )
+        );
+    }
+
+    @Test
+    void createApplicationUser_tenantRequiresDomain() {
+
+        when(userRepository
+                .existsByUsername("john"))
+                .thenReturn(false);
+
+        when(userRepository
+                .existsByEmail("x"))
+                .thenReturn(false);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.createApplicationUser(
+                        "john",
+                        "x",
+                        "kc",
+                        null,
+                        "TENANT"
+                )
+        );
+    }
+
+    @Test
+    void createApplicationUser_tenantSuccess() {
+
+        Tenant tenant = tenant();
+
+        when(userRepository
+                .existsByUsername("john"))
+                .thenReturn(false);
+
+        when(userRepository
+                .existsByEmail("x"))
+                .thenReturn(false);
+
+        when(tenantService
+                .getTenantByDomain("nike"))
+                .thenReturn(tenant);
+
+        when(roleService
+                .getRoleByName("TENANT"))
+                .thenReturn(tenantRole());
+
+        when(userRepository
+                .save(any(User.class)))
+                .thenAnswer(invocation ->
+                        invocation.getArgument(0));
+
+        var result =
+                service.createApplicationUser(
+                        "john",
+                        "x",
+                        "kc",
+                        " nike ",
+                        "tenant"
+                );
+
+        assertEquals(
+                "TENANT",
+                result.getRole()
+        );
+
+        verify(tenantService)
+                .getTenantByDomain("nike");
+    }
+
+    @Test
+    void getUserByUsername_notFound() {
+
+        when(userRepository
+                .findByUsername("x"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> service.getUserByUsername("x")
+        );
+    }
+
+    @Test
+    void getUserByKeycloakUserId_success() {
+
+        User user = user();
+
+        when(userRepository
+                .findByKeycloakUserId("kc-1"))
+                .thenReturn(Optional.of(user));
+
+        assertSame(
+                user,
+                service.getUserByKeycloakUserId("kc-1")
+        );
+    }
+
+    @Test
+    void getUsersByTenant_success() {
+
+        Tenant tenant = tenant();
+
+        when(tenantService
+                .getTenantByDomain("nike"))
+                .thenReturn(tenant);
+
+        when(userRepository
+                .findByTenant(tenant))
+                .thenReturn(
+                        List.of(user())
+                );
+
+        assertEquals(
+                1,
+                service.getUsersByTenant("nike")
+                        .size()
+        );
+    }
+
+    @Test
+    void makeUserTenant_success() {
+
+        User user = user();
+        Tenant tenant = tenant();
+
+        when(userRepository
+                .findById(1L))
+                .thenReturn(Optional.of(user));
+
+        when(tenantService
+                .createOrReactivateTenant(
+                        "Nike",
+                        "nike"
+                ))
+                .thenReturn(tenant);
+
+        when(roleService
+                .getRoleByName("TENANT"))
+                .thenReturn(tenantRole());
+
+        when(userRepository
+                .save(user))
+                .thenReturn(user);
+
+        var result =
+                service.makeUserTenant(
+                        1L,
+                        " Nike ",
+                        " nike "
+                );
+
+        assertEquals(
+                "TENANT",
+                result.getRole()
+        );
+
+        assertSame(
+                tenant,
+                user.getTenant()
+        );
+
+        verify(keycloakAdminService)
+                .removeRealmRole(
+                        "kc-1",
+                        "USER"
+                );
+
+        verify(keycloakAdminService)
+                .assignRealmRole(
+                        "kc-1",
+                        "TENANT"
+                );
+    }
+
+    @Test
+    void makeUserTenant_alreadyTenant_rejected() {
+
+        User user = user();
+
+        user.setRole(tenantRole());
+
+        when(userRepository
+                .findById(1L))
+                .thenReturn(Optional.of(user));
+
+        assertThrows(
+                ResourceAlreadyExistsException.class,
+                () -> service.makeUserTenant(
+                        1L,
+                        "Nike",
+                        "nike"
+                )
+        );
+    }
+
+    @Test
+    void removeUserTenant_success() {
+
+        User user = user();
+        Tenant tenant = tenant();
+
+        user.setRole(tenantRole());
+        user.setTenant(tenant);
+
+        Role userRole = userRole();
+
+        when(userRepository
+                .findById(1L))
+                .thenReturn(Optional.of(user));
+
+        when(roleService
+                .getRoleByName("USER"))
+                .thenReturn(userRole);
+
+        when(userRepository
+                .save(user))
+                .thenReturn(user);
+
+        var result =
+                service.removeUserTenant(1L);
+
+        assertEquals(
+                "USER",
+                result.getRole()
+        );
+
+        assertNull(
+                user.getTenant()
+        );
+
+        verify(tenantService)
+                .deleteTenant(5L);
+
+        verify(keycloakAdminService)
+                .removeRealmRole(
+                        "kc-1",
+                        "TENANT"
+                );
+
+        verify(keycloakAdminService)
+                .assignRealmRole(
+                        "kc-1",
+                        "USER"
+                );
+    }
+}

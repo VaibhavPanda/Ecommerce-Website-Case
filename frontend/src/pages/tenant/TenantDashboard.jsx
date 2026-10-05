@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -7,10 +8,39 @@ import {
   faGaugeHigh,
 } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../../context/AuthContext";
+import { getTenantProducts } from "../../services/tenantProductService";
 import "./TenantDashboard.css";
 
 function TenantDashboard() {
   const { user } = useAuth();
+
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      if (!user?.tenant?.domain) return;
+
+      try {
+        const response = await getTenantProducts(user.tenant.domain, {
+          page: 0,
+          size: 20,
+        });
+
+        setProducts(response.data.content || []);
+      } catch (error) {
+        console.error("Failed to load tenant products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, [user]);
+
+  const totalProducts = products.length;
+
+  const activeProducts = products.filter((product) => product.active).length;
 
   return (
     <main className="tenant-dashboard">
@@ -30,6 +60,38 @@ function TenantDashboard() {
         </div>
       </header>
 
+      {/* DASHBOARD STATS */}
+      <section className="tenant-dashboard-stats">
+        <article className="tenant-dashboard-stat-card">
+          <div className="tenant-dashboard-stat-icon">
+            <FontAwesomeIcon icon={faBoxOpen} />
+          </div>
+
+          <div>
+            <span className="tenant-dashboard-stat-label">TOTAL PRODUCTS</span>
+
+            <strong className="tenant-dashboard-stat-value">
+              {loading ? "—" : totalProducts}
+            </strong>
+          </div>
+        </article>
+
+        <article className="tenant-dashboard-stat-card">
+          <div className="tenant-dashboard-stat-icon">
+            <FontAwesomeIcon icon={faBoxOpen} />
+          </div>
+
+          <div>
+            <span className="tenant-dashboard-stat-label">ACTIVE PRODUCTS</span>
+
+            <strong className="tenant-dashboard-stat-value">
+              {loading ? "—" : activeProducts}
+            </strong>
+          </div>
+        </article>
+      </section>
+
+      {/* MANAGEMENT CARDS */}
       <section className="tenant-dashboard-grid">
         <article className="tenant-dashboard-card">
           <div className="tenant-dashboard-card-icon">

@@ -1,245 +1,280 @@
-// package com.example.backend.service;
+package com.example.backend.service;
 
-// import static org.junit.jupiter.api.Assertions.*;
-// import static org.mockito.ArgumentMatchers.*;
-// import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-// import java.util.List;
-// import java.util.Optional;
+import java.util.List;
+import java.util.Optional;
 
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.api.extension.ExtendWith;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-// import com.example.backend.entity.Category;
-// import com.example.backend.entity.Tenant;
-// import com.example.backend.exception.ResourceAlreadyExistsException;
-// import com.example.backend.exception.ResourceNotFoundException;
-// import com.example.backend.repository.CategoryRepository;
-// import com.example.backend.security.TenantAccessService;
+import com.example.backend.entity.Category;
+import com.example.backend.entity.Tenant;
+import com.example.backend.exception.ResourceAlreadyExistsException;
+import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.repository.CategoryRepository;
+import com.example.backend.repository.ProductRepository;
+import com.example.backend.security.TenantAccessService;
 
-// @ExtendWith(MockitoExtension.class)
-// class CategoryServiceTest {
+@ExtendWith(MockitoExtension.class)
+class CategoryServiceUnitTest {
 
-//   @Mock
-//   private CategoryRepository categoryRepository;
+  @Mock
+  private CategoryRepository categoryRepository;
 
-//   @Mock
-//   private TenantService tenantService;
+  @Mock
+  private TenantService tenantService;
 
-//   @Mock
-//   private TenantAccessService tenantAccessService;
+  @Mock
+  private TenantAccessService tenantAccessService;
 
-//   @InjectMocks
-//   private CategoryService categoryService;
+  @Mock
+  private ProductRepository productRepository;
 
-//   private Tenant tenant;
-//   private Category category;
+  @InjectMocks
+  private CategoryService service;
 
-//   @BeforeEach
-//   void setUp() {
+  private Tenant tenant() {
+    return new Tenant(
+        1L,
+        "Nike",
+        "nike",
+        true);
+  }
 
-//     tenant = new Tenant();
-//     tenant.setId(1L);
-//     tenant.setName("Nike");
-//     tenant.setDomain("nike");
+  @Test
+  void createCategory_success() {
 
-//     category = new Category();
-//     category.setId(10L);
-//     category.setName("Shoes");
-//     category.setTenant(tenant);
-//   }
+    Tenant tenant = tenant();
 
-//   // Test successful category creation
-//   @Test
-//   void shouldCreateCategorySuccessfully() {
+    when(tenantService.getTenantByDomain("nike"))
+        .thenReturn(tenant);
 
-//     when(tenantService.getTenantByDomain("nike"))
-//         .thenReturn(tenant);
+    when(categoryRepository
+        .existsByNameAndTenant("Shoes", tenant))
+        .thenReturn(false);
 
-//     when(categoryRepository.existsByNameAndTenant("Shoes", tenant))
-//         .thenReturn(false);
+    Category saved = new Category(
+        1L,
+        "Shoes",
+        tenant);
 
-//     when(categoryRepository.save(any(Category.class)))
-//         .thenReturn(category);
+    when(categoryRepository.save(any(Category.class)))
+        .thenReturn(saved);
 
-//     Category result = categoryService.createCategory("nike", "Shoes");
+    Category result = service.createCategory(
+        "nike",
+        "Shoes");
 
-//     assertNotNull(result);
-//     assertEquals("Shoes", result.getName());
-//     assertEquals(tenant, result.getTenant());
+    assertEquals(
+        "Shoes",
+        result.getName());
 
-//     verify(tenantAccessService)
-//         .validateTenantAccess("nike");
+    verify(tenantAccessService)
+        .validateTenantAccess("nike");
+  }
 
-//     verify(categoryRepository)
-//         .save(any(Category.class));
-//   }
+  @Test
+  void createCategory_duplicate_rejected() {
 
-//   // Test duplicate category rejection
-//   @Test
-//   void shouldThrowExceptionWhenCategoryAlreadyExists() {
+    Tenant tenant = tenant();
 
-//     when(tenantService.getTenantByDomain("nike"))
-//         .thenReturn(tenant);
+    when(tenantService.getTenantByDomain("nike"))
+        .thenReturn(tenant);
 
-//     when(categoryRepository.existsByNameAndTenant("Shoes", tenant))
-//         .thenReturn(true);
+    when(categoryRepository
+        .existsByNameAndTenant("Shoes", tenant))
+        .thenReturn(true);
 
-//     assertThrows(
-//         ResourceAlreadyExistsException.class,
-//         () -> categoryService.createCategory("nike", "Shoes"));
+    assertThrows(
+        ResourceAlreadyExistsException.class,
+        () -> service.createCategory(
+            "nike",
+            "Shoes"));
+  }
 
-//     verify(categoryRepository, never())
-//         .save(any(Category.class));
-//   }
+  @Test
+  void getCategories_success() {
+
+    Tenant tenant = tenant();
 
-//   // Test retrieving all categories for a tenant
-//   @Test
-//   void shouldGetCategoriesSuccessfully() {
+    when(tenantService.getTenantByDomain("nike"))
+        .thenReturn(tenant);
 
-//     List<Category> categories = List.of(category);
+    when(categoryRepository.findByTenant(tenant))
+        .thenReturn(List.of(
+            new Category(
+                1L,
+                "Shoes",
+                tenant)));
 
-//     when(tenantService.getTenantByDomain("nike"))
-//         .thenReturn(tenant);
+    assertEquals(
+        1,
+        service.getCategories("nike").size());
+  }
 
-//     when(categoryRepository.findByTenant(tenant))
-//         .thenReturn(categories);
+  @Test
+  void getCategory_notFound() {
 
-//     List<Category> result = categoryService.getCategories("nike");
+    Tenant tenant = tenant();
 
-//     assertNotNull(result);
-//     assertEquals(1, result.size());
-//     assertEquals("Shoes", result.get(0).getName());
+    when(tenantService.getTenantByDomain("nike"))
+        .thenReturn(tenant);
 
-//     verify(tenantAccessService)
-//         .validateTenantAccess("nike");
+    when(categoryRepository
+        .findByIdAndTenant(99L, tenant))
+        .thenReturn(Optional.empty());
 
-//     verify(categoryRepository)
-//         .findByTenant(tenant);
-//   }
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> service.getCategory(
+            "nike",
+            99L));
+  }
 
-//   // Test retrieving a category by ID
-//   @Test
-//   void shouldGetCategorySuccessfully() {
+  @Test
+  void updateCategory_success() {
 
-//     when(tenantService.getTenantByDomain("nike"))
-//         .thenReturn(tenant);
+    Tenant tenant = tenant();
 
-//     when(categoryRepository.findByIdAndTenant(10L, tenant))
-//         .thenReturn(Optional.of(category));
+    Category category = new Category(
+        1L,
+        "Shoes",
+        tenant);
 
-//     Category result = categoryService.getCategory("nike", 10L);
+    when(tenantService.getTenantByDomain("nike"))
+        .thenReturn(tenant);
 
-//     assertNotNull(result);
-//     assertEquals(10L, result.getId());
-//     assertEquals("Shoes", result.getName());
-//   }
+    when(categoryRepository
+        .findByIdAndTenant(1L, tenant))
+        .thenReturn(Optional.of(category));
 
-//   // Test category not found scenario
-//   @Test
-//   void shouldThrowExceptionWhenCategoryDoesNotExist() {
+    when(categoryRepository
+        .existsByNameAndTenant("Running", tenant))
+        .thenReturn(false);
 
-//     when(tenantService.getTenantByDomain("nike"))
-//         .thenReturn(tenant);
+    when(categoryRepository.save(category))
+        .thenReturn(category);
 
-//     when(categoryRepository.findByIdAndTenant(999L, tenant))
-//         .thenReturn(Optional.empty());
+    Category result = service.updateCategory(
+        "nike",
+        1L,
+        "Running");
 
-//     assertThrows(
-//         ResourceNotFoundException.class,
-//         () -> categoryService.getCategory("nike", 999L));
-//   }
+    assertEquals(
+        "Running",
+        result.getName());
+  }
 
-//   // Test successful category update
-//   @Test
-//   void shouldUpdateCategorySuccessfully() {
+  @Test
+  void updateCategory_duplicate_rejected() {
 
-//     when(tenantService.getTenantByDomain("nike"))
-//         .thenReturn(tenant);
+    Tenant tenant = tenant();
 
-//     when(categoryRepository.findByIdAndTenant(10L, tenant))
-//         .thenReturn(Optional.of(category));
-
-//     when(categoryRepository.existsByNameAndTenant("Clothing", tenant))
-//         .thenReturn(false);
-
-//     when(categoryRepository.save(category))
-//         .thenReturn(category);
-
-//     Category result = categoryService.updateCategory(
-//         "nike",
-//         10L,
-//         "Clothing");
-
-//     assertNotNull(result);
-//     assertEquals("Clothing", result.getName());
-
-//     verify(categoryRepository)
-//         .save(category);
-//   }
-
-//   // Test duplicate category name during update
-//   @Test
-//   void shouldThrowExceptionWhenUpdatingToExistingCategoryName() {
-
-//     when(tenantService.getTenantByDomain("nike"))
-//         .thenReturn(tenant);
-
-//     when(categoryRepository.findByIdAndTenant(10L, tenant))
-//         .thenReturn(Optional.of(category));
-
-//     when(categoryRepository.existsByNameAndTenant("Clothing", tenant))
-//         .thenReturn(true);
-
-//     assertThrows(
-//         ResourceAlreadyExistsException.class,
-//         () -> categoryService.updateCategory(
-//             "nike",
-//             10L,
-//             "Clothing"));
-
-//     verify(categoryRepository, never())
-//         .save(any(Category.class));
-//   }
-
-//   // Test successful category deletion
-//   @Test
-//   void shouldDeleteCategorySuccessfully() {
-
-//     when(tenantService.getTenantByDomain("nike"))
-//         .thenReturn(tenant);
-
-//     when(categoryRepository.findByIdAndTenant(10L, tenant))
-//         .thenReturn(Optional.of(category));
-
-//     categoryService.deleteCategory("nike", 10L);
-
-//     verify(categoryRepository)
-//         .delete(category);
-//   }
-
-//   // Test retrieving public category names
-//   @Test
-//   void shouldGetPublicCategoriesSuccessfully() {
-
-//     List<String> categories = List.of("Clothing", "Shoes", "Watches");
-
-//     when(categoryRepository.findDistinctCategoryNames())
-//         .thenReturn(categories);
-
-//     List<String> result = categoryService.getPublicCategories();
-
-//     assertNotNull(result);
-//     assertEquals(3, result.size());
-//     assertEquals("Clothing", result.get(0));
-//     assertEquals("Shoes", result.get(1));
-//     assertEquals("Watches", result.get(2));
-
-//     verify(categoryRepository)
-//         .findDistinctCategoryNames();
-//   }
-// }
+    Category category = new Category(
+        1L,
+        "Shoes",
+        tenant);
+
+    when(tenantService.getTenantByDomain("nike"))
+        .thenReturn(tenant);
+
+    when(categoryRepository
+        .findByIdAndTenant(1L, tenant))
+        .thenReturn(Optional.of(category));
+
+    when(categoryRepository
+        .existsByNameAndTenant(
+            "Running",
+            tenant))
+        .thenReturn(true);
+
+    assertThrows(
+        ResourceAlreadyExistsException.class,
+        () -> service.updateCategory(
+            "nike",
+            1L,
+            "Running"));
+  }
+
+  @Test
+  void deleteCategory_withProducts_rejected() {
+
+    Tenant tenant = tenant();
+
+    Category category = new Category(
+        1L,
+        "Shoes",
+        tenant);
+
+    when(tenantService.getTenantByDomain("nike"))
+        .thenReturn(tenant);
+
+    when(categoryRepository
+        .findByIdAndTenant(1L, tenant))
+        .thenReturn(Optional.of(category));
+
+    when(productRepository
+        .existsByCategory(category))
+        .thenReturn(true);
+
+    assertThrows(
+        ResourceAlreadyExistsException.class,
+        () -> service.deleteCategory(
+            "nike",
+            1L));
+
+    verify(categoryRepository, never())
+        .delete(category);
+  }
+
+  @Test
+  void deleteCategory_withoutProducts_success() {
+
+    Tenant tenant = tenant();
+
+    Category category = new Category(
+        1L,
+        "Shoes",
+        tenant);
+
+    when(tenantService.getTenantByDomain("nike"))
+        .thenReturn(tenant);
+
+    when(categoryRepository
+        .findByIdAndTenant(1L, tenant))
+        .thenReturn(Optional.of(category));
+
+    when(productRepository
+        .existsByCategory(category))
+        .thenReturn(false);
+
+    service.deleteCategory(
+        "nike",
+        1L);
+
+    verify(categoryRepository)
+        .delete(category);
+  }
+
+  @Test
+  void publicCategories_returnsRepositoryResult() {
+
+    when(categoryRepository
+        .findDistinctActiveCategoryNames())
+        .thenReturn(
+            List.of(
+                "Football",
+                "Shoes"));
+
+    assertEquals(
+        List.of(
+            "Football",
+            "Shoes"),
+        service.getPublicCategories());
+  }
+}

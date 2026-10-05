@@ -1,201 +1,268 @@
-// package com.example.backend.service;
+package com.example.backend.service;
 
-// import static org.junit.jupiter.api.Assertions.*;
-// import static org.mockito.ArgumentMatchers.any;
-// import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-// import java.math.BigDecimal;
-// import java.util.List;
-// import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.api.extension.ExtendWith;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-// import com.example.backend.dto.order.CreateOrderRequest;
-// import com.example.backend.dto.order.OrderItemRequest;
-// import com.example.backend.dto.order.OrderResponse;
-// import com.example.backend.entity.Product;
-// import com.example.backend.entity.User;
-// import com.example.backend.exception.InsufficientStockException;
-// import com.example.backend.repository.OrderRepository;
-// import com.example.backend.repository.ProductRepository;
-// import com.example.backend.security.CurrentUserService;
+import com.example.backend.dto.order.CreateOrderRequest;
+import com.example.backend.dto.order.OrderItemRequest;
+import com.example.backend.entity.Category;
+import com.example.backend.entity.Order;
+import com.example.backend.entity.Product;
+import com.example.backend.entity.Role;
+import com.example.backend.entity.Tenant;
+import com.example.backend.entity.User;
+import com.example.backend.exception.InsufficientStockException;
+import com.example.backend.exception.ResourceAlreadyExistsException;
+import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.repository.OrderRepository;
+import com.example.backend.repository.ProductRepository;
+import com.example.backend.security.CurrentUserService;
 
-// @ExtendWith(MockitoExtension.class)
-// class OrderServiceTest {
+@ExtendWith(MockitoExtension.class)
+class OrderServiceUnitTest {
 
-//   @Mock
-//   private OrderRepository orderRepository;
+  @Mock
+  private OrderRepository orderRepository;
 
-//   @Mock
-//   private ProductRepository productRepository;
+  @Mock
+  private ProductRepository productRepository;
 
-//   @Mock
-//   private CurrentUserService currentUserService;
+  @Mock
+  private CurrentUserService currentUserService;
 
-//   @InjectMocks
-//   private OrderService orderService;
+  @InjectMocks
+  private OrderService service;
 
-//   private User user;
-//   private Product product;
+  private User user() {
 
-//   @BeforeEach
-//   void setUp() {
+    Role role = new Role(
+        1L,
+        "USER");
 
-//     user = new User();
-//     user.setId(1L);
-//     user.setUsername("testuser");
+    return new User(
+        1L,
+        "user",
+        "user@test.com",
+        "kc-1",
+        null,
+        role);
+  }
 
-//     product = new Product();
-//     product.setId(1L);
-//     product.setName("Nike Shoes");
-//     product.setPrice(new BigDecimal("2000.00"));
-//     product.setQuantity(10);
-//   }
+  private Product product() {
 
-//   @Test
-//   void shouldCreateOrderSuccessfully() {
+    Tenant tenant = new Tenant(
+        1L,
+        "Nike",
+        "nike",
+        true);
 
-//     when(currentUserService.getCurrentUser())
-//         .thenReturn(user);
+    Category category = new Category(
+        1L,
+        "Shoes",
+        tenant);
 
-//     when(productRepository.findByIdForUpdate(1L))
-//         .thenReturn(Optional.of(product));
+    return new Product(
+        10L,
+        "Pegasus",
+        "Running",
+        new BigDecimal("100.00"),
+        10,
+        true,
+        tenant,
+        category);
+  }
 
-//     when(orderRepository.save(any()))
-//         .thenAnswer(invocation -> {
+  private CreateOrderRequest request(
+      long productId,
+      int quantity) {
 
-//           var order = invocation.getArgument(0,
-//               com.example.backend.entity.Order.class);
+    return new CreateOrderRequest(
+        List.of(
+            new OrderItemRequest(
+                productId,
+                quantity)));
+  }
 
-//           order.setId(100L);
+  @Test
+  void createOrder_success_calculatesTotalsAndReducesStock() {
 
-//           return order;
-//         });
+    User user = user();
+    Product product = product();
 
-//     OrderItemRequest itemRequest = new OrderItemRequest();
-//     itemRequest.setProductId(1L);
-//     itemRequest.setQuantity(2);
+    when(currentUserService.getCurrentUser())
+        .thenReturn(user);
 
-//     CreateOrderRequest request = new CreateOrderRequest();
-//     request.setItems(List.of(itemRequest));
+    when(productRepository
+        .findActiveByIdForUpdate(10L))
+        .thenReturn(Optional.of(product));
 
-//     OrderResponse response = orderService.createOrder(request);
+    when(orderRepository.save(any(Order.class)))
+        .thenAnswer(invocation -> {
 
-//     assertNotNull(response);
+          Order order = invocation.getArgument(0);
 
-//     assertEquals(100L, response.getOrderId());
+          order.setId(100L);
 
-//     assertEquals(2, response.getTotalQuantity());
+          return order;
+        });
 
-//     assertEquals(
-//         new BigDecimal("4000.00"),
-//         response.getTotalAmount());
+    var result = service.createOrder(
+        request(10L, 3));
 
-//     assertEquals(8, product.getQuantity());
+    assertEquals(
+        3,
+        result.getTotalQuantity());
 
-//     verify(productRepository).findByIdForUpdate(1L);
+    assertEquals(
+        new BigDecimal("300.00"),
+        result.getTotalAmount());
 
-//     verify(orderRepository).save(any());
-//   }
+    assertEquals(
+        7,
+        product.getQuantity());
 
-//   @Test
-//   void shouldRejectOrderWhenQuantityIsNotAvailable() {
+    assertEquals(
+        1,
+        result.getItems().size());
 
-//     when(currentUserService.getCurrentUser())
-//         .thenReturn(user);
+    assertEquals(
+        new BigDecimal("100.00"),
+        result.getItems()
+            .get(0)
+            .getPrice());
 
-//     when(productRepository.findByIdForUpdate(1L))
-//         .thenReturn(Optional.of(product));
+    verify(orderRepository)
+        .save(any(Order.class));
+  }
 
-//     OrderItemRequest itemRequest = new OrderItemRequest();
-//     itemRequest.setProductId(1L);
-//     itemRequest.setQuantity(10);
+  @Test
+  void duplicateProductInOrder_rejected() {
 
-//     CreateOrderRequest request = new CreateOrderRequest();
-//     request.setItems(List.of(itemRequest));
+    when(currentUserService.getCurrentUser())
+        .thenReturn(user());
 
-//     assertThrows(
-//         InsufficientStockException.class,
-//         () -> orderService.createOrder(request));
+    CreateOrderRequest request = new CreateOrderRequest(
+        List.of(
+            new OrderItemRequest(10L, 1),
+            new OrderItemRequest(10L, 2)));
 
-//     assertEquals(10, product.getQuantity());
+    assertThrows(
+        ResourceAlreadyExistsException.class,
+        () -> service.createOrder(request));
 
-//     verify(orderRepository, never()).save(any());
-//   }
+    verifyNoInteractions(
+        productRepository,
+        orderRepository);
+  }
 
-//   @Test
-//   void shouldRejectOrderWhenProductDoesNotExist() {
+  @Test
+  void quantityEqualToAvailable_isRejected() {
 
-//     when(currentUserService.getCurrentUser())
-//         .thenReturn(user);
+    Product product = product();
 
-//     when(productRepository.findByIdForUpdate(999L))
-//         .thenReturn(Optional.empty());
+    when(currentUserService.getCurrentUser())
+        .thenReturn(user());
 
-//     OrderItemRequest itemRequest = new OrderItemRequest();
-//     itemRequest.setProductId(999L);
-//     itemRequest.setQuantity(1);
+    when(productRepository
+        .findActiveByIdForUpdate(10L))
+        .thenReturn(Optional.of(product));
 
-//     CreateOrderRequest request = new CreateOrderRequest();
-//     request.setItems(List.of(itemRequest));
+    assertThrows(
+        InsufficientStockException.class,
+        () -> service.createOrder(
+            request(10L, 10)));
 
-//     assertThrows(
-//         com.example.backend.exception.ResourceNotFoundException.class,
-//         () -> orderService.createOrder(request));
+    verify(
+        orderRepository,
+        never()).save(any());
+  }
 
-//     verify(orderRepository, never()).save(any());
-//   }
+  @Test
+  void quantityGreaterThanAvailable_isRejected() {
 
-//   @Test
-//   void shouldReturnCurrentUsersOrders() {
+    Product product = product();
 
-//     when(currentUserService.getCurrentUser())
-//         .thenReturn(user);
+    when(currentUserService.getCurrentUser())
+        .thenReturn(user());
 
-//     com.example.backend.entity.Order order = new com.example.backend.entity.Order();
+    when(productRepository
+        .findActiveByIdForUpdate(10L))
+        .thenReturn(Optional.of(product));
 
-//     order.setId(100L);
-//     order.setUser(user);
-//     order.setTotalQuantity(2);
-//     order.setTotalAmount(new BigDecimal("4000.00"));
-//     order.setOrderDate(java.time.LocalDateTime.now());
-//     order.setOrderItems(List.of());
+    assertThrows(
+        InsufficientStockException.class,
+        () -> service.createOrder(
+            request(10L, 11)));
+  }
 
-//     when(orderRepository.findByUserOrderByIdDesc(user))
-//         .thenReturn(List.of(order));
+  @Test
+  void inactiveOrMissingProduct_rejected() {
 
-//     List<OrderResponse> responses = orderService.getMyOrders();
+    when(currentUserService.getCurrentUser())
+        .thenReturn(user());
 
-//     assertEquals(1, responses.size());
+    when(productRepository
+        .findActiveByIdForUpdate(99L))
+        .thenReturn(Optional.empty());
 
-//     assertEquals(
-//         100L,
-//         responses.get(0).getOrderId());
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> service.createOrder(
+            request(99L, 1)));
+  }
 
-//     assertEquals(
-//         new BigDecimal("4000.00"),
-//         responses.get(0).getTotalAmount());
+  @Test
+  void getMyOrders_returnsCurrentUsersHistory() {
 
-//     verify(orderRepository)
-//         .findByUserOrderByIdDesc(user);
-//   }
+    User user = user();
 
-//   @Test
-//   void shouldRejectOrderBelongingToAnotherUser() {
+    Order order = new Order();
 
-//     when(currentUserService.getCurrentUser())
-//         .thenReturn(user);
+    order.setId(1L);
+    order.setUser(user);
+    order.setOrderItems(List.of());
+    order.setTotalQuantity(0);
+    order.setTotalAmount(BigDecimal.ZERO);
 
-//     when(orderRepository.findByIdAndUser(999L, user))
-//         .thenReturn(Optional.empty());
+    when(currentUserService.getCurrentUser())
+        .thenReturn(user);
 
-//     assertThrows(
-//         com.example.backend.exception.ResourceNotFoundException.class,
-//         () -> orderService.getMyOrder(999L));
-//   }
-// }
+    when(orderRepository
+        .findByUserOrderByIdDesc(user))
+        .thenReturn(List.of(order));
+
+    assertEquals(
+        1,
+        service.getMyOrders().size());
+  }
+
+  @Test
+  void getMyOrder_wrongUserCannotAccess() {
+
+    User user = user();
+
+    when(currentUserService.getCurrentUser())
+        .thenReturn(user);
+
+    when(orderRepository
+        .findByIdAndUser(99L, user))
+        .thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> service.getMyOrder(99L));
+  }
+}
+
+
+//

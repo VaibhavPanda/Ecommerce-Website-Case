@@ -1,8 +1,18 @@
 .favorites-page {
+  width: 100%;
   max-width: 1000px;
+
   margin: 0 auto;
   padding: 44px 24px 60px;
+
+  color: var(--text-primary);
+
+  transition: color 0.35s ease;
 }
+
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .favorites-header {
   margin-bottom: 30px;
@@ -11,62 +21,96 @@
 .favorites-eyebrow {
   margin: 0 0 8px;
 
-  color: #777;
+  color: var(--text-muted);
+
   font-size: 12px;
   font-weight: 700;
+
   letter-spacing: 0.08em;
+
+  transition: color 0.35s ease;
 }
 
 .favorites-header h1 {
   margin: 0;
 
-  color: #111;
+  color: var(--text-primary);
+
   font-size: 34px;
   line-height: 1.2;
+
+  transition: color 0.35s ease;
 }
 
 .favorites-header p:last-child {
   margin: 10px 0 0;
 
-  color: #777;
+  color: var(--text-secondary);
+
   font-size: 14px;
+
+  transition: color 0.35s ease;
 }
+
+/* =========================================================
+   FAVORITES LIST
+   ========================================================= */
 
 .favorites-list {
   display: flex;
   flex-direction: column;
+
   gap: 14px;
 }
+
+/* =========================================================
+   FAVORITE ITEM
+   ========================================================= */
 
 .favorite-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 24px;
 
   padding: 20px 22px;
 
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
 
-  background: #fff;
+  background: var(--surface-primary);
 
   transition:
+    background-color 0.35s ease,
     border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .favorite-item:hover {
-  border-color: #d5d5d5;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.05);
+  border-color: var(--border-color-strong);
+
+  box-shadow:
+    0 8px 22px var(--shadow-color);
 }
+
+/* =========================================================
+   FAVORITE ITEM MAIN
+   ========================================================= */
 
 .favorite-item-main {
   display: flex;
   align-items: center;
+
   gap: 14px;
+
   min-width: 0;
 }
+
+/* =========================================================
+   HEART ICON
+   ========================================================= */
 
 .favorite-icon {
   width: 44px;
@@ -78,16 +122,25 @@
 
   flex-shrink: 0;
 
-  border: 1px solid #f0d0d0;
+  border: 1px solid var(--favorite-border);
   border-radius: 8px;
 
-  background: #fff5f5;
-  color: #e53935;
+  background: var(--favorite-background);
+  color: var(--favorite-color);
+
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease;
 }
 
 .favorite-icon svg {
   font-size: 16px;
 }
+
+/* =========================================================
+   FAVORITE INFORMATION
+   ========================================================= */
 
 .favorite-item-info {
   min-width: 0;
@@ -96,93 +149,136 @@
 .favorite-item-info h2 {
   margin: 0 0 6px;
 
-  color: #222;
+  color: var(--text-primary);
+
   font-size: 17px;
 
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  transition: color 0.35s ease;
 }
 
 .favorite-item-info p {
   margin: 0;
 
-  color: #666;
+  color: var(--text-secondary);
+
   font-size: 14px;
+
+  transition: color 0.35s ease;
 }
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
 
 .favorite-actions {
   display: flex;
   align-items: center;
+
   gap: 10px;
 
   flex-shrink: 0;
 }
 
+/* =========================================================
+   VIEW PRODUCT
+   ========================================================= */
+
 .favorite-view-button {
   display: inline-flex;
   align-items: center;
+
   gap: 7px;
 
   padding: 9px 14px;
 
+  border: 1px solid var(--button-border);
   border-radius: 7px;
 
-  background: #111;
-  color: #fff;
+  background: var(--button-background);
+  color: var(--button-text);
 
   font-size: 13px;
   font-weight: 600;
+
   text-decoration: none;
 
-  transition: background 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .favorite-view-button:hover {
-  background: #333;
+  background: var(--button-background-hover);
+}
+
+.favorite-view-button:active {
+  transform: scale(0.98);
 }
 
 .favorite-view-button svg {
   font-size: 10px;
 }
 
+/* =========================================================
+   REMOVE BUTTON
+   ========================================================= */
+
 .favorite-remove-button {
   display: inline-flex;
   align-items: center;
+
   gap: 7px;
 
   padding: 8px 12px;
 
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color-strong);
   border-radius: 7px;
 
-  background: #fff;
-  color: #666;
+  background: var(--surface-primary);
+  color: var(--text-secondary);
 
   font-size: 13px;
 
   cursor: pointer;
 
   transition:
+    background-color 0.2s ease,
     color 0.2s ease,
     border-color 0.2s ease,
-    background 0.2s ease;
+    transform 0.2s ease;
 }
 
 .favorite-remove-button:hover:not(:disabled) {
-  border-color: #e0baba;
-  background: #fff7f7;
-  color: #c62828;
+  border-color: var(--danger-border);
+
+  background: var(--danger-background);
+
+  color: var(--danger-color);
+}
+
+.favorite-remove-button:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .favorite-remove-button:disabled {
   opacity: 0.5;
+
   cursor: not-allowed;
 }
 
 .favorite-remove-button svg {
   font-size: 11px;
 }
+
+/* =========================================================
+   LOADING / ERROR STATE
+   ========================================================= */
 
 .favorites-state {
   min-height: 60vh;
@@ -194,21 +290,34 @@
 
   padding: 30px 20px;
 
+  color: var(--text-primary);
+
   text-align: center;
+
+  transition: color 0.35s ease;
 }
 
 .favorites-state p {
   margin: 9px 0 0;
 
-  color: #777;
+  color: var(--text-secondary);
+
   font-size: 14px;
+
+  transition: color 0.35s ease;
 }
 
 .favorites-state h2 {
   margin: 14px 0 0;
 
-  color: #222;
+  color: var(--text-primary);
+
+  transition: color 0.35s ease;
 }
+
+/* =========================================================
+   STATE ICON
+   ========================================================= */
 
 .favorites-state-icon,
 .favorites-empty-icon {
@@ -219,19 +328,30 @@
   align-items: center;
   justify-content: center;
 
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color-strong);
   border-radius: 50%;
 
-  color: #555;
+  color: var(--text-secondary);
+
   font-size: 18px;
+
+  transition:
+    color 0.35s ease,
+    border-color 0.35s ease,
+    background-color 0.35s ease;
 }
+
+/* =========================================================
+   LOADER
+   ========================================================= */
 
 .favorites-loader {
   width: 32px;
   height: 32px;
 
-  border: 3px solid #e5e5e5;
-  border-top-color: #111;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--text-primary);
+
   border-radius: 50%;
 
   animation: favorites-spin 0.8s linear infinite;
@@ -242,6 +362,10 @@
     transform: rotate(360deg);
   }
 }
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
 
 .favorites-empty {
   min-height: 60vh;
@@ -262,49 +386,77 @@
 
   margin-bottom: 20px;
 
-  color: #e53935;
-  background: #fff7f7;
-  border-color: #f0d0d0;
+  border-color: var(--favorite-border);
+
+  background: var(--favorite-background);
+  color: var(--favorite-color);
 }
 
 .favorites-empty h1 {
   margin: 0;
 
-  color: #222;
+  color: var(--text-primary);
+
   font-size: 26px;
+
+  transition: color 0.35s ease;
 }
 
 .favorites-empty p {
   margin: 10px 0 24px;
 
-  color: #777;
+  color: var(--text-secondary);
+
   font-size: 14px;
+
+  transition: color 0.35s ease;
 }
+
+/* =========================================================
+   PRIMARY BUTTON
+   ========================================================= */
 
 .favorites-primary-button {
   display: inline-flex;
   align-items: center;
+
   gap: 8px;
 
   padding: 11px 18px;
 
+  border: 1px solid var(--button-border);
   border-radius: 7px;
 
-  background: #111;
-  color: #fff;
+  background: var(--button-background);
+  color: var(--button-text);
 
   font-size: 14px;
   font-weight: 600;
+
   text-decoration: none;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .favorites-primary-button:hover {
-  background: #333;
+  background: var(--button-background-hover);
+}
+
+.favorites-primary-button:active {
+  transform: scale(0.98);
 }
 
 .favorites-primary-button svg {
   font-size: 12px;
 }
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
 
 @media (max-width: 650px) {
   .favorites-page {
@@ -317,7 +469,9 @@
 
   .favorite-item {
     align-items: flex-start;
+
     flex-direction: column;
+
     gap: 18px;
   }
 
@@ -327,6 +481,7 @@
 
   .favorite-view-button {
     flex: 1;
+
     justify-content: center;
   }
 }

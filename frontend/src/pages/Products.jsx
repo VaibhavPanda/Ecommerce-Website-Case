@@ -20,6 +20,9 @@ import {
 
 import "./Products.css";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowDownWideShort } from "@fortawesome/free-solid-svg-icons";
+
 function Products() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -28,6 +31,7 @@ function Products() {
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+  const [sort, setSort] = useState("id,asc");
 
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -64,6 +68,7 @@ function Products() {
         const params = {
           page,
           size: 20,
+          sort,
         };
 
         if (debouncedSearch.trim()) {
@@ -87,7 +92,7 @@ function Products() {
     };
 
     loadProducts();
-  }, [debouncedSearch, category, page]);
+  }, [debouncedSearch, category, page, sort]);
 
   useEffect(() => {
     if (!initialized) {
@@ -180,6 +185,21 @@ function Products() {
     window.location.reload();
   };
 
+  const handleSortChange = (value) => {
+    setSort(value);
+    setPage(0);
+
+    const params = new URLSearchParams(searchParams);
+
+    if (value && value !== "id,asc") {
+      params.set("sort", value);
+    } else {
+      params.delete("sort");
+    }
+
+    setSearchParams(params, { replace: true });
+  };
+
   return (
     <main className="products-page">
       <header className="products-header">
@@ -200,6 +220,27 @@ function Products() {
           value={category}
           onChange={handleCategoryChange}
         />
+
+        <div className="sort-filter">
+          <FontAwesomeIcon
+            icon={faArrowDownWideShort}
+            className="sort-filter-icon"
+          />
+          <select
+            id="product-sort"
+            value={sort}
+            onChange={(event) => handleSortChange(event.target.value)}
+            aria-label="Sort products"
+          >
+            <option value="id,asc">Sort By</option>
+
+            <option value="price,asc">Price: Low to High</option>
+
+            <option value="price,desc">Price: High to Low</option>
+
+            <option value="id,desc">Newest Arrivals</option>
+          </select>
+        </div>
       </section>
 
       {!loading && !error && (
@@ -212,13 +253,14 @@ function Products() {
               : "No products"}
           </span>
 
-          {(search.trim() || category) && (
+          {(search.trim() || category || sort !== "id,asc") && (
             <button
               type="button"
               className="clear-filters"
               onClick={() => {
                 setSearch("");
                 setCategory("");
+                setSort("id,asc")
                 setPage(0);
               }}
             >
@@ -263,13 +305,14 @@ function Products() {
             Try changing your search term or selecting a different category.
           </p>
 
-          {(search.trim() || category) && (
+          {(search.trim() || category || sort !== "id,asc") && (
             <button
               type="button"
               className="products-retry-button"
               onClick={() => {
                 setSearch("");
                 setCategory("");
+                setSort("id,asc");
                 setPage(0);
               }}
             >
@@ -295,7 +338,7 @@ function Products() {
             ))}
           </div>
 
-            //pagination - setpage(0) whenever we want to filter.
+          {/* //pagination - setpage(0) whenever we want to filter. */}
           {totalPages > 1 && (
             <div className="pagination">
               <button

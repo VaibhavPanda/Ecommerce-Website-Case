@@ -47,7 +47,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = () => {
-    keycloak.login();
+    keycloak.login({
+      redirectUri: window.location.origin,
+    });
   };
 
   const logout = () => {

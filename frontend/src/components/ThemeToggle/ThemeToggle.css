@@ -1,0 +1,186 @@
+.theme-toggle {
+  width: 54px;
+  height: 30px;
+
+  padding: 0;
+  border: 0;
+
+  background: transparent;
+
+  flex-shrink: 0;
+
+  cursor: pointer;
+}
+
+.theme-toggle-track {
+  position: relative;
+
+  display: block;
+
+  width: 54px;
+  height: 30px;
+
+  border-radius: 999px;
+
+  background: #e1e3e6;
+  border: 1px solid #d4d7da;
+
+  overflow: hidden;
+
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+/* THUMB */
+
+.theme-toggle-thumb {
+  position: absolute;
+
+  top: 3px;
+  left: 3px;
+
+  width: 22px;
+  height: 22px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  z-index: 2;
+
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.18);
+
+  transition:
+    transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+/* ICON */
+
+.theme-toggle-thumb-icon {
+  position: relative;
+
+  z-index: 3;
+
+  font-size: 10px;
+
+  color: #4b5056;
+
+  transition:
+    color 0.25s ease,
+    transform 0.3s ease;
+}
+
+/*
+   DARK MODE
+    */
+
+.theme-toggle-dark .theme-toggle-track {
+  background: #34383e;
+  border-color: #454a51;
+}
+
+.theme-toggle-dark .theme-toggle-thumb {
+  transform: translateX(24px);
+
+  background: #dfe2e6;
+
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.theme-toggle-dark .theme-toggle-thumb-icon {
+  color: #34383e;
+}
+
+/* HOVER */
+
+.theme-toggle:hover .theme-toggle-track {
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.theme-toggle-dark:hover .theme-toggle-track {
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* =========================================================
+   ACTIVE / PRESS
+   ========================================================= */
+
+.theme-toggle:active .theme-toggle-thumb {
+  transform: scale(0.92);
+}
+
+.theme-toggle-dark:active .theme-toggle-thumb {
+  transform: translateX(24px) scale(0.92);
+}
+
+/* =========================================================
+   KEYBOARD ACCESSIBILITY
+   ========================================================= */
+
+.theme-toggle:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 3px;
+
+  border-radius: 999px;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 650px) {
+  .theme-toggle {
+    width: 48px;
+    height: 27px;
+  }
+
+  .theme-toggle-track {
+    width: 48px;
+    height: 27px;
+  }
+
+  .theme-toggle-thumb {
+    top: 3px;
+    left: 3px;
+
+    width: 19px;
+    height: 19px;
+  }
+
+  .theme-toggle-thumb-icon {
+    font-size: 9px;
+  }
+
+  .theme-toggle-dark .theme-toggle-thumb {
+    transform: translateX(21px);
+  }
+
+  .theme-toggle-dark:active .theme-toggle-thumb {
+    transform: translateX(21px) scale(0.92);
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .theme-toggle-track,
+  .theme-toggle-thumb,
+  .theme-toggle-thumb-icon {
+    transition: none;
+  }
+}

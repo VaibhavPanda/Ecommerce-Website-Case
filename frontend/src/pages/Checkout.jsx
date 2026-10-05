@@ -177,6 +177,11 @@ function Checkout() {
               <strong>Unable to place order</strong>
 
               <p>{error}</p>
+
+              <Link to="/cart" className="checkout-error-link">
+                <FontAwesomeIcon icon={faArrowLeft} />
+                Review Cart
+              </Link>
             </div>
           )}
 

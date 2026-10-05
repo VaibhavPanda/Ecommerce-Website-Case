@@ -23,6 +23,7 @@ function TenantProducts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const loadProducts = async () => {
     if (!tenantDomain) {
@@ -50,27 +51,28 @@ function TenantProducts() {
     loadProducts();
   }, [tenantDomain]);
 
-  const handleDelete = async (productId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this product?",
-    );
+  const handleDelete = (product) => {
+    setDeleteTarget(product);
+  };
 
-    if (!confirmed) {
+  const confirmDelete = async () => {
+    if (!deleteTarget) {
       return;
     }
 
     try {
-      setDeletingId(productId);
+      setDeletingId(deleteTarget.id);
       setError("");
 
-      await deleteTenantProduct(tenantDomain, productId);
+      await deleteTenantProduct(tenantDomain, deleteTarget.id);
 
       setProducts((currentProducts) =>
-        currentProducts.filter((product) => product.id !== productId),
+        currentProducts.filter((product) => product.id !== deleteTarget.id),
       );
+
+      setDeleteTarget(null);
     } catch (error) {
       console.error("Failed to delete product:", error);
-
       setError(error.response?.data?.message || "Failed to delete product.");
     } finally {
       setDeletingId(null);
@@ -173,6 +175,16 @@ function TenantProducts() {
                       <h2>{product.name}</h2>
 
                       <span
+                        className={`tenant-product-status ${
+                          product.active
+                            ? "tenant-product-status-active"
+                            : "tenant-product-status-inactive"
+                        }`}
+                      >
+                        {product.active ? "Active" : "Inactive"}
+                      </span>
+
+                      <span
                         className={`tenant-product-stock ${
                           isOutOfStock
                             ? "tenant-product-stock-out"
@@ -213,7 +225,7 @@ function TenantProducts() {
                   <button
                     type="button"
                     className="tenant-product-delete-button"
-                    onClick={() => handleDelete(product.id)}
+                    onClick={() => handleDelete(product)}
                     disabled={deletingId === product.id}
                   >
                     <FontAwesomeIcon icon={faTrash} />
@@ -224,6 +236,55 @@ function TenantProducts() {
             );
           })}
         </section>
+      )}
+
+      {deleteTarget && (
+        <div
+          className="tenant-products-modal-overlay"
+          onClick={() => {
+            if (!deletingId) {
+              setDeleteTarget(null);
+            }
+          }}
+        >
+          <div
+            className="tenant-products-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="tenant-products-modal-icon">
+              <FontAwesomeIcon icon={faTrash} />
+            </div>
+
+            <h2>Delete product?</h2>
+
+            <p>
+              Are you sure you want to delete{" "}
+              <strong>{deleteTarget.name}</strong>?
+            </p>
+
+            <div className="tenant-products-modal-actions">
+              <button
+                type="button"
+                className="tenant-products-modal-cancel"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deletingId === deleteTarget.id}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="tenant-products-modal-confirm"
+                onClick={confirmDelete}
+                disabled={deletingId === deleteTarget.id}
+              >
+                {deletingId === deleteTarget.id
+                  ? "Deleting..."
+                  : "Delete Product"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );

@@ -15,6 +15,8 @@ import CreateProduct from "./pages/tenant/CreateProduct";
 import EditProduct from "./pages/tenant/EditProduct";
 import TenantCategories from "./pages/tenant/TenantCategories";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import Register from "./pages/Register";
 
 function App() {
   return (
@@ -25,6 +27,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/:productId" element={<ProductDetails />} />
+        <Route path="/register" element={<Register />} />
         //customer
         <Route element={<ProtectedRoute allowedRoles={["USER", "TENANT"]} />}>
           <Route path="/favorites" element={<Favorites />} />
@@ -46,6 +49,7 @@ function App() {
         </Route>
         //admin
         <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<AdminUsers />} />
         </Route>
       </Routes>

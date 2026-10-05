@@ -9,8 +9,8 @@ import com.example.backend.entity.Tenant;
 import com.example.backend.exception.ResourceAlreadyExistsException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.CategoryRepository;
-import com.example.backend.security.TenantAccessService;
 import com.example.backend.repository.ProductRepository;
+import com.example.backend.security.TenantAccessService;
 
 @Service
 public class CategoryService {
@@ -81,7 +81,7 @@ public class CategoryService {
             "Category not found"));
   }
 
-  //soft delete also validates tenant
+  // delete also validates tenant
   public void deleteCategory(
       String tenantDomain,
       Long categoryId) {

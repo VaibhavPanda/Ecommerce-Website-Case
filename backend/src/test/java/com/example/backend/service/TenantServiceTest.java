@@ -1,215 +1,251 @@
-// package com.example.backend.service;
+package com.example.backend.service;
 
-// import static org.junit.jupiter.api.Assertions.*;
-// import static org.mockito.ArgumentMatchers.*;
-// import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-// import java.util.List;
-// import java.util.Optional;
+import java.util.List;
+import java.util.Optional;
 
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.api.extension.ExtendWith;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-// import com.example.backend.entity.Tenant;
-// import com.example.backend.exception.ResourceAlreadyExistsException;
-// import com.example.backend.exception.ResourceNotFoundException;
-// import com.example.backend.repository.TenantRepository;
+import com.example.backend.entity.Tenant;
+import com.example.backend.exception.ResourceAlreadyExistsException;
+import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.repository.TenantRepository;
 
-// @ExtendWith(MockitoExtension.class)
-// class TenantServiceTest {
+@ExtendWith(MockitoExtension.class)
+class TenantServiceUnitTest {
 
-//   @Mock
-//   private TenantRepository tenantRepository;
+    @Mock
+    private TenantRepository tenantRepository;
 
-//   @InjectMocks
-//   private TenantService tenantService;
+    @InjectMocks
+    private TenantService service;
 
-//   private Tenant tenant;
+    @Test
+    void createTenant_success() {
 
-//   @BeforeEach
-//   void setUp() {
+        Tenant tenant =
+                new Tenant(null, "Nike", "nike", false);
 
-//     tenant = new Tenant();
-//     tenant.setId(1L);
-//     tenant.setName("Nike");
-//     tenant.setDomain("nike");
-//   }
+        when(tenantRepository.existsByName("Nike"))
+                .thenReturn(false);
 
-//   // Test successful tenant creation
-//   @Test
-//   void shouldCreateTenantSuccessfully() {
+        when(tenantRepository.existsByDomain("nike"))
+                .thenReturn(false);
 
-//     when(tenantRepository.existsByName("Nike"))
-//         .thenReturn(false);
+        when(tenantRepository.save(tenant))
+                .thenReturn(tenant);
 
-//     when(tenantRepository.existsByDomain("nike"))
-//         .thenReturn(false);
+        Tenant result = service.createTenant(tenant);
 
-//     when(tenantRepository.save(any(Tenant.class)))
-//         .thenReturn(tenant);
+        assertTrue(result.isActive());
 
-//     Tenant result = tenantService.createTenant(tenant);
+        verify(tenantRepository).save(tenant);
+    }
 
-//     assertNotNull(result);
-//     assertEquals(1L, result.getId());
-//     assertEquals("Nike", result.getName());
-//     assertEquals("nike", result.getDomain());
+    @Test
+    void createTenant_duplicateName_rejected() {
 
-//     verify(tenantRepository)
-//         .save(tenant);
-//   }
+        Tenant tenant =
+                new Tenant(null, "Nike", "nike", false);
 
-//   // Test duplicate tenant name rejection
-//   @Test
-//   void shouldThrowExceptionWhenTenantNameAlreadyExists() {
+        when(tenantRepository.existsByName("Nike"))
+                .thenReturn(true);
 
-//     when(tenantRepository.existsByName("Nike"))
-//         .thenReturn(true);
+        assertThrows(
+                ResourceAlreadyExistsException.class,
+                () -> service.createTenant(tenant)
+        );
 
-//     assertThrows(
-//         ResourceAlreadyExistsException.class,
-//         () -> tenantService.createTenant(tenant));
+        verify(tenantRepository, never())
+                .save(any());
+    }
 
-//     verify(tenantRepository, never())
-//         .save(any(Tenant.class));
+    @Test
+    void createTenant_duplicateDomain_rejected() {
 
-//     verify(tenantRepository, never())
-//         .existsByDomain(anyString());
-//   }
+        Tenant tenant =
+                new Tenant(null, "Nike", "nike", false);
 
-//   // Test duplicate tenant domain rejection
-//   @Test
-//   void shouldThrowExceptionWhenTenantDomainAlreadyExists() {
+        when(tenantRepository.existsByName("Nike"))
+                .thenReturn(false);
 
-//     when(tenantRepository.existsByName("Nike"))
-//         .thenReturn(false);
+        when(tenantRepository.existsByDomain("nike"))
+                .thenReturn(true);
 
-//     when(tenantRepository.existsByDomain("nike"))
-//         .thenReturn(true);
+        assertThrows(
+                ResourceAlreadyExistsException.class,
+                () -> service.createTenant(tenant)
+        );
+    }
 
-//     assertThrows(
-//         ResourceAlreadyExistsException.class,
-//         () -> tenantService.createTenant(tenant));
+    @Test
+    void getAllTenants_returnsAll() {
 
-//     verify(tenantRepository, never())
-//         .save(any(Tenant.class));
-//   }
+        when(tenantRepository.findAll())
+                .thenReturn(List.of(
+                        new Tenant(),
+                        new Tenant()
+                ));
 
-//   // Test retrieving all tenants
-//   @Test
-//   void shouldGetAllTenantsSuccessfully() {
+        assertEquals(
+                2,
+                service.getAllTenants().size()
+        );
+    }
 
-//     Tenant adidas = new Tenant();
-//     adidas.setId(2L);
-//     adidas.setName("Adidas");
-//     adidas.setDomain("adidas");
+    @Test
+    void getTenantById_notFound() {
 
-//     List<Tenant> tenants = List.of(tenant, adidas);
+        when(tenantRepository.findById(1L))
+                .thenReturn(Optional.empty());
 
-//     when(tenantRepository.findAll())
-//         .thenReturn(tenants);
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> service.getTenantById(1L)
+        );
+    }
 
-//     List<Tenant> result = tenantService.getAllTenants();
+    @Test
+    void getTenantByDomain_success() {
 
-//     assertNotNull(result);
-//     assertEquals(2, result.size());
-//     assertEquals("Nike", result.get(0).getName());
-//     assertEquals("Adidas", result.get(1).getName());
+        Tenant tenant =
+                new Tenant(
+                        1L,
+                        "Nike",
+                        "nike",
+                        true
+                );
 
-//     verify(tenantRepository)
-//         .findAll();
-//   }
+        when(tenantRepository.findByDomain("nike"))
+                .thenReturn(Optional.of(tenant));
 
-//   // Test retrieving tenant by ID
-//   @Test
-//   void shouldGetTenantByIdSuccessfully() {
+        assertSame(
+                tenant,
+                service.getTenantByDomain("nike")
+        );
+    }
 
-//     when(tenantRepository.findById(1L))
-//         .thenReturn(Optional.of(tenant));
+    @Test
+    void deleteTenant_softDeletes() {
 
-//     Tenant result = tenantService.getTenantById(1L);
+        Tenant tenant =
+                new Tenant(
+                        1L,
+                        "Nike",
+                        "nike",
+                        true
+                );
 
-//     assertNotNull(result);
-//     assertEquals(1L, result.getId());
-//     assertEquals("Nike", result.getName());
+        when(tenantRepository.findById(1L))
+                .thenReturn(Optional.of(tenant));
 
-//     verify(tenantRepository)
-//         .findById(1L);
-//   }
+        service.deleteTenant(1L);
 
-//   // Test tenant not found when searching by ID
-//   @Test
-//   void shouldThrowExceptionWhenTenantIdDoesNotExist() {
+        assertFalse(tenant.isActive());
 
-//     when(tenantRepository.findById(999L))
-//         .thenReturn(Optional.empty());
+        verify(tenantRepository)
+                .save(tenant);
+    }
 
-//     assertThrows(
-//         ResourceNotFoundException.class,
-//         () -> tenantService.getTenantById(999L));
-//   }
+    @Test
+    void deleteTenant_alreadyInactive_rejected() {
 
-//   // Test retrieving tenant by domain
-//   @Test
-//   void shouldGetTenantByDomainSuccessfully() {
+        Tenant tenant =
+                new Tenant(
+                        1L,
+                        "Nike",
+                        "nike",
+                        false
+                );
 
-//     when(tenantRepository.findByDomain("nike"))
-//         .thenReturn(Optional.of(tenant));
+        when(tenantRepository.findById(1L))
+                .thenReturn(Optional.of(tenant));
 
-//     Tenant result = tenantService.getTenantByDomain("nike");
+        assertThrows(
+                ResourceAlreadyExistsException.class,
+                () -> service.deleteTenant(1L)
+        );
+    }
 
-//     assertNotNull(result);
-//     assertEquals("Nike", result.getName());
-//     assertEquals("nike", result.getDomain());
+    @Test
+    void activateTenant_success() {
 
-//     verify(tenantRepository)
-//         .findByDomain("nike");
-//   }
+        Tenant tenant =
+                new Tenant(
+                        1L,
+                        "Nike",
+                        "nike",
+                        false
+                );
 
-//   // Test tenant not found when searching by domain
-//   @Test
-//   void shouldThrowExceptionWhenTenantDomainDoesNotExist() {
+        when(tenantRepository.findById(1L))
+                .thenReturn(Optional.of(tenant));
 
-//     when(tenantRepository.findByDomain("unknown"))
-//         .thenReturn(Optional.empty());
+        service.activateTenant(1L);
 
-//     assertThrows(
-//         ResourceNotFoundException.class,
-//         () -> tenantService.getTenantByDomain("unknown"));
-//   }
+        assertTrue(tenant.isActive());
 
-//   // Test successful tenant deletion
-//   @Test
-//   void shouldDeleteTenantSuccessfully() {
+        verify(tenantRepository)
+                .save(tenant);
+    }
 
-//     when(tenantRepository.findById(1L))
-//         .thenReturn(Optional.of(tenant));
+    @Test
+    void createOrReactivateTenant_reactivatesSameTenant() {
 
-//     tenantService.deleteTenant(1L);
+        Tenant tenant =
+                new Tenant(
+                        1L,
+                        "Nike",
+                        "nike",
+                        false
+                );
 
-//     verify(tenantRepository)
-//         .findById(1L);
+        when(tenantRepository.findByName("Nike"))
+                .thenReturn(Optional.of(tenant));
 
-//     verify(tenantRepository)
-//         .delete(tenant);
-//   }
+        when(tenantRepository.findByDomain("nike"))
+                .thenReturn(Optional.of(tenant));
 
-//   // Test deletion when tenant does not exist
-//   @Test
-//   void shouldThrowExceptionWhenDeletingNonExistingTenant() {
+        when(tenantRepository.save(tenant))
+                .thenReturn(tenant);
 
-//     when(tenantRepository.findById(999L))
-//         .thenReturn(Optional.empty());
+        Tenant result =
+                service.createOrReactivateTenant(
+                        "Nike",
+                        "nike"
+                );
 
-//     assertThrows(
-//         ResourceNotFoundException.class,
-//         () -> tenantService.deleteTenant(999L));
+        assertSame(tenant, result);
+        assertTrue(tenant.isActive());
+    }
 
-//     verify(tenantRepository, never())
-//         .delete(any(Tenant.class));
-//   }
-// }
+    @Test
+    void createOrReactivateTenant_createsNew() {
+
+        when(tenantRepository.findByName("Nike"))
+                .thenReturn(Optional.empty());
+
+        when(tenantRepository.findByDomain("nike"))
+                .thenReturn(Optional.empty());
+
+        when(tenantRepository.save(any(Tenant.class)))
+                .thenAnswer(invocation ->
+                        invocation.getArgument(0));
+
+        Tenant result =
+                service.createOrReactivateTenant(
+                        "Nike",
+                        "nike"
+                );
+
+        assertEquals("Nike", result.getName());
+        assertEquals("nike", result.getDomain());
+        assertTrue(result.isActive());
+    }
+}

@@ -120,6 +120,7 @@ public class OrderService {
 
       totalAmount = totalAmount.add(subtotal);
 
+      //update product
       product.setQuantity(
           availableQuantity - requestedQuantity);
 

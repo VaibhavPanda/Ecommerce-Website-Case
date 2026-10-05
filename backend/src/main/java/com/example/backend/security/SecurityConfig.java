@@ -11,7 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
+import org.springframework.http.HttpMethod;
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
@@ -28,14 +28,24 @@ public class SecurityConfig {
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
         .authorizeHttpRequests(auth -> auth
+
+            .requestMatchers(HttpMethod.OPTIONS, "/**")
+            .permitAll()
+
             .requestMatchers(
                 "/api/test",
-                "/api/auth/register",
                 "/api/products/**",
                 "/api/products",
                 "/api/categories")
             .permitAll()
-            .anyRequest().authenticated())
+
+            .requestMatchers(
+                HttpMethod.POST,
+                "/api/auth/register")
+            .permitAll()
+
+            .anyRequest()
+            .authenticated())
 
             //use JWT
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {

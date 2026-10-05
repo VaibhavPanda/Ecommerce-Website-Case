@@ -1,175 +1,134 @@
-// package com.example.backend.security;
+package com.example.backend.security;
 
-// import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-// import static org.junit.jupiter.api.Assertions.assertThrows;
-// import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.api.extension.ExtendWith;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.junit.jupiter.MockitoExtension;
-// import org.springframework.security.access.AccessDeniedException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
-// import com.example.backend.entity.Role;
-// import com.example.backend.entity.Tenant;
-// import com.example.backend.entity.User;
+import com.example.backend.entity.Role;
+import com.example.backend.entity.Tenant;
+import com.example.backend.entity.User;
 
-// @ExtendWith(MockitoExtension.class)
-// class TenantAccessServiceTest {
+@ExtendWith(MockitoExtension.class)
+class TenantAccessServiceUnitTest {
 
-//   @Mock
-//   private CurrentUserService currentUserService;
+  @Mock
+  private CurrentUserService currentUserService;
 
-//   @InjectMocks
-//   private TenantAccessService tenantAccessService;
+  @InjectMocks
+  private TenantAccessService service;
 
-//   private Tenant nike;
-//   private Tenant adidas;
+  private User user(
+      String role,
+      Tenant tenant) {
 
-//   private Role tenantRole;
-//   private Role adminRole;
-//   private Role userRole;
+    return new User(
+        1L,
+        "user",
+        "user@test.com",
+        "kc",
+        tenant,
+        new Role(1L, role));
+  }
 
-//   private User nikeUser;
-//   private User adminUser;
-//   private User normalUser;
+  @Test
+  void adminCanAccessAnyTenant() {
 
-//   @BeforeEach
-//   void setUp() {
+    when(currentUserService
+        .getCurrentUser())
+        .thenReturn(
+            user(
+                "ADMIN",
+                null));
 
-//     // Create Nike tenant
-//     nike = new Tenant();
-//     nike.setId(1L);
-//     nike.setName("Nike");
-//     nike.setDomain("nike");
+    assertDoesNotThrow(
+        () -> service
+            .validateTenantAccess("nike"));
+  }
 
-//     // Create Adidas tenant
-//     adidas = new Tenant();
-//     adidas.setId(2L);
-//     adidas.setName("Adidas");
-//     adidas.setDomain("adidas");
+  @Test
+  void matchingTenantAllowed() {
 
-//     // Create TENANT role
-//     tenantRole = new Role();
-//     tenantRole.setId(1L);
-//     tenantRole.setName("TENANT");
+    Tenant tenant = new Tenant(
+        1L,
+        "Nike",
+        "nike",
+        true);
 
-//     // Create ADMIN role
-//     adminRole = new Role();
-//     adminRole.setId(2L);
-//     adminRole.setName("ADMIN");
+    when(currentUserService
+        .getCurrentUser())
+        .thenReturn(
+            user(
+                "TENANT",
+                tenant));
 
-//     // Create USER role
-//     userRole = new Role();
-//     userRole.setId(3L);
-//     userRole.setName("USER");
+    assertDoesNotThrow(
+        () -> service
+            .validateTenantAccess("NIKE"));
+  }
 
-//     // Nike tenant user
-//     nikeUser = new User();
-//     nikeUser.setId(100L);
-//     nikeUser.setUsername("nikeuser");
-//     nikeUser.setTenant(nike);
-//     nikeUser.setRole(tenantRole);
+  @Test
+  void noTenantDenied() {
 
-//     // Platform admin
-//     adminUser = new User();
-//     adminUser.setId(200L);
-//     adminUser.setUsername("adminuser");
-//     adminUser.setTenant(null);
-//     adminUser.setRole(adminRole);
+    when(currentUserService
+        .getCurrentUser())
+        .thenReturn(
+            user(
+                "USER",
+                null));
 
-//     // Normal user
-//     normalUser = new User();
-//     normalUser.setId(300L);
-//     normalUser.setUsername("normaluser");
-//     normalUser.setTenant(null);
-//     normalUser.setRole(userRole);
-//   }
+    assertThrows(
+        AccessDeniedException.class,
+        () -> service
+            .validateTenantAccess("nike"));
+  }
 
-//   // Test that a tenant user can access their own tenant
-//   @Test
-//   void shouldAllowUserToAccessOwnTenant() {
+  @Test
+  void inactiveTenantDenied() {
 
-//     when(currentUserService.getCurrentUser())
-//         .thenReturn(nikeUser);
+    Tenant tenant = new Tenant(
+        1L,
+        "Nike",
+        "nike",
+        false);
 
-//     assertDoesNotThrow(() -> tenantAccessService.validateTenantAccess("nike"));
+    when(currentUserService
+        .getCurrentUser())
+        .thenReturn(
+            user(
+                "TENANT",
+                tenant));
 
-//     verify(currentUserService)
-//         .getCurrentUser();
-//   }
+    assertThrows(
+        AccessDeniedException.class,
+        () -> service
+            .validateTenantAccess("nike"));
+  }
 
-//   // Test that a tenant user cannot access another tenant
-//   @Test
-//   void shouldDenyUserAccessToAnotherTenant() {
+  @Test
+  void differentTenantDenied() {
 
-//     when(currentUserService.getCurrentUser())
-//         .thenReturn(nikeUser);
+    Tenant tenant = new Tenant(
+        1L,
+        "Nike",
+        "nike",
+        true);
 
-//     assertThrows(
-//         AccessDeniedException.class,
-//         () -> tenantAccessService.validateTenantAccess("adidas"));
+    when(currentUserService
+        .getCurrentUser())
+        .thenReturn(
+            user(
+                "TENANT",
+                tenant));
 
-//     verify(currentUserService)
-//         .getCurrentUser();
-//   }
-
-//   // Test that tenant comparison is case-insensitive
-//   @Test
-//   void shouldAllowAccessWhenTenantDomainDiffersOnlyByCase() {
-
-//     when(currentUserService.getCurrentUser())
-//         .thenReturn(nikeUser);
-
-//     assertDoesNotThrow(() -> tenantAccessService.validateTenantAccess("NIKE"));
-//   }
-
-//   // Test that platform admin can access any tenant
-//   @Test
-//   void shouldAllowAdminToAccessAnyTenant() {
-
-//     when(currentUserService.getCurrentUser())
-//         .thenReturn(adminUser);
-
-//     assertDoesNotThrow(() -> tenantAccessService.validateTenantAccess("nike"));
-
-//     assertDoesNotThrow(() -> tenantAccessService.validateTenantAccess("adidas"));
-
-//     assertDoesNotThrow(() -> tenantAccessService.validateTenantAccess("any-tenant"));
-//   }
-
-//   // Test that a normal user without a tenant cannot access a tenant-scoped
-//   // endpoint
-//   @Test
-//   void shouldDenyUserWhenUserHasNoTenant() {
-
-//     when(currentUserService.getCurrentUser())
-//         .thenReturn(normalUser);
-
-//     assertThrows(
-//         AccessDeniedException.class,
-//         () -> tenantAccessService.validateTenantAccess("nike"));
-//   }
-
-//   // Test that tenant user cannot access another tenant even if the tenant exists
-//   @Test
-//   void shouldStrictlyEnforceTenantIsolation() {
-
-//     when(currentUserService.getCurrentUser())
-//         .thenReturn(nikeUser);
-
-//     assertThrows(
-//         AccessDeniedException.class,
-//         () -> tenantAccessService.validateTenantAccess("adidas"));
-
-//     assertThrows(
-//         AccessDeniedException.class,
-//         () -> tenantAccessService.validateTenantAccess("amazon"));
-
-//     assertThrows(
-//         AccessDeniedException.class,
-//         () -> tenantAccessService.validateTenantAccess("puma"));
-//   }
-// }
+    assertThrows(
+        AccessDeniedException.class,
+        () -> service
+            .validateTenantAccess("adidas"));
+  }
+}

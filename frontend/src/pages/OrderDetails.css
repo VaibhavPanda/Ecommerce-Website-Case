@@ -1,33 +1,51 @@
 .order-details-page {
   max-width: 1100px;
+
   margin: 0 auto;
   padding: 44px 24px 60px;
+
+  color: var(--text-primary);
+
+  transition: color 0.35s ease;
 }
+
+/* =========================================================
+   BACK LINK
+   ========================================================= */
 
 .order-details-back-link {
   display: inline-flex;
   align-items: center;
+
   gap: 8px;
 
   margin-bottom: 28px;
 
-  color: #555;
+  color: var(--text-secondary);
+
   font-size: 14px;
   text-decoration: none;
+
+  transition: color 0.2s ease;
 }
 
 .order-details-back-link:hover {
-  color: #111;
+  color: var(--text-primary);
 }
 
 .order-details-back-link svg {
   font-size: 12px;
 }
 
+/* =========================================================
+   HEADER
+   ========================================================= */
+
 .order-details-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+
   gap: 24px;
 
   margin-bottom: 30px;
@@ -36,62 +54,99 @@
 .order-details-eyebrow {
   margin: 0 0 8px;
 
-  color: #777;
+  color: var(--text-muted);
+
   font-size: 12px;
   font-weight: 700;
+
   letter-spacing: 0.08em;
+
+  transition: color 0.35s ease;
 }
 
 .order-details-header h1 {
   margin: 0;
 
-  color: #111;
+  color: var(--text-primary);
+
   font-size: 32px;
+
+  transition: color 0.35s ease;
 }
 
 .order-details-header p:last-child {
   margin: 9px 0 0;
 
-  color: #777;
+  color: var(--text-secondary);
+
   font-size: 14px;
+
+  transition: color 0.35s ease;
 }
+
+/* =========================================================
+   ORDER STATUS
+   ========================================================= */
 
 .order-status {
   display: inline-flex;
   align-items: center;
+
   gap: 7px;
 
   padding: 8px 12px;
 
-  border: 1px solid #cce5d4;
+  border: 1px solid var(--success-border);
   border-radius: 999px;
 
-  background: #f2faf4;
-  color: #287a45;
+  background: var(--success-background);
+
+  color: var(--success-color);
 
   font-size: 13px;
   font-weight: 600;
+
   white-space: nowrap;
+
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease;
 }
 
 .order-status svg {
   font-size: 11px;
 }
 
+/* =========================================================
+   MAIN LAYOUT
+   ========================================================= */
+
 .order-details-layout {
   display: grid;
+
   grid-template-columns: minmax(0, 1fr) 320px;
+
   align-items: start;
+
   gap: 28px;
 }
+
+/* =========================================================
+   ORDER ITEMS
+   ========================================================= */
 
 .order-items-section {
   padding: 24px;
 
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
 
-  background: #fff;
+  background: var(--surface-primary);
+
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease;
 }
 
 .order-section-header {
@@ -101,19 +156,27 @@
 
   padding-bottom: 18px;
 
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
+
+  transition: border-color 0.35s ease;
 }
 
 .order-section-header h2 {
   margin: 0;
 
-  color: #222;
+  color: var(--text-primary);
+
   font-size: 19px;
+
+  transition: color 0.35s ease;
 }
 
 .order-section-header span {
-  color: #888;
+  color: var(--text-muted);
+
   font-size: 13px;
+
+  transition: color 0.35s ease;
 }
 
 .order-items-list {
@@ -125,11 +188,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 20px;
 
   padding: 20px 0;
 
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
+
+  transition: border-color 0.35s ease;
 }
 
 .order-item:last-child {
@@ -139,6 +205,7 @@
 .order-item-main {
   display: flex;
   align-items: center;
+
   gap: 14px;
 }
 
@@ -152,11 +219,17 @@
 
   flex-shrink: 0;
 
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-color-strong);
   border-radius: 8px;
 
-  background: #fafafa;
-  color: #555;
+  background: var(--surface-secondary);
+
+  color: var(--text-secondary);
+
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease;
 }
 
 .order-item-icon svg {
@@ -166,23 +239,36 @@
 .order-item h3 {
   margin: 0 0 5px;
 
-  color: #222;
+  color: var(--text-primary);
+
   font-size: 15px;
+
+  transition: color 0.35s ease;
 }
 
 .order-item p {
   margin: 0;
 
-  color: #777;
+  color: var(--text-secondary);
+
   font-size: 13px;
+
+  transition: color 0.35s ease;
 }
 
 .order-item>strong {
   flex-shrink: 0;
 
-  color: #222;
+  color: var(--text-primary);
+
   font-size: 15px;
+
+  transition: color 0.35s ease;
 }
+
+/* =========================================================
+   ORDER SUMMARY
+   ========================================================= */
 
 .order-summary {
   position: sticky;
@@ -190,17 +276,27 @@
 
   padding: 24px;
 
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
 
-  background: #fff;
+  background: var(--surface-primary);
+
+  box-shadow: 0 4px 16px var(--shadow-color);
+
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
 }
 
 .order-summary h2 {
   margin: 0 0 22px;
 
-  color: #222;
+  color: var(--text-primary);
+
   font-size: 20px;
+
+  transition: color 0.35s ease;
 }
 
 .order-summary-row {
@@ -208,8 +304,17 @@
   align-items: center;
   justify-content: space-between;
 
-  color: #666;
+  color: var(--text-secondary);
+
   font-size: 14px;
+
+  transition: color 0.35s ease;
+}
+
+.order-summary-row strong {
+  color: var(--text-primary);
+
+  transition: color 0.35s ease;
 }
 
 .order-summary-divider {
@@ -217,7 +322,9 @@
 
   margin: 18px 0;
 
-  background: #eee;
+  background: var(--border-color);
+
+  transition: background-color 0.35s ease;
 }
 
 .order-summary-total {
@@ -229,42 +336,70 @@
 }
 
 .order-summary-total span {
-  color: #333;
+  color: var(--text-primary);
+
   font-size: 14px;
+
+  transition: color 0.35s ease;
 }
 
 .order-summary-total strong {
-  color: #111;
+  color: var(--text-primary);
+
   font-size: 22px;
+
+  transition: color 0.35s ease;
 }
+
+/* =========================================================
+   CONTINUE SHOPPING
+   ========================================================= */
 
 .order-shop-button {
   width: 100%;
   height: 44px;
+
   box-sizing: border-box;
 
   display: flex;
   align-items: center;
   justify-content: center;
+
   gap: 8px;
 
+  border: 1px solid var(--button-border);
   border-radius: 7px;
 
-  background: #111;
-  color: #fff;
+  background: var(--button-background);
+  color: var(--button-text);
 
   font-size: 13px;
   font-weight: 600;
+
   text-decoration: none;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .order-shop-button:hover {
-  background: #333;
+  background: var(--button-background-hover);
+}
+
+.order-shop-button:active {
+  transform: scale(0.98);
 }
 
 .order-shop-button svg {
   font-size: 12px;
 }
+
+/* =========================================================
+   LOADING / ERROR STATE
+   ========================================================= */
 
 .order-details-state {
   min-height: 60vh;
@@ -282,13 +417,17 @@
 .order-details-state p {
   margin: 9px 0 0;
 
-  color: #777;
+  color: var(--text-secondary);
+
+  transition: color 0.35s ease;
 }
 
 .order-details-state h2 {
   margin: 14px 0 0;
 
-  color: #222;
+  color: var(--text-primary);
+
+  transition: color 0.35s ease;
 }
 
 .order-details-state-icon {
@@ -299,18 +438,30 @@
   align-items: center;
   justify-content: center;
 
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color-strong);
   border-radius: 50%;
 
-  color: #555;
+  background: var(--surface-secondary);
+
+  color: var(--text-secondary);
+
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease;
 }
+
+/* =========================================================
+   LOADER
+   ========================================================= */
 
 .order-details-loader {
   width: 32px;
   height: 32px;
 
-  border: 3px solid #e5e5e5;
-  border-top-color: #111;
+  border: 3px solid var(--spinner-track);
+  border-top-color: var(--spinner-active);
+
   border-radius: 50%;
 
   animation: order-details-spin 0.8s linear infinite;
@@ -322,28 +473,48 @@
   }
 }
 
+/* =========================================================
+   ERROR / BACK BUTTON
+   ========================================================= */
+
 .order-details-primary-button {
   display: inline-flex;
   align-items: center;
+
   gap: 8px;
 
   margin-top: 22px;
-
   padding: 10px 16px;
 
+  border: 1px solid var(--button-border);
   border-radius: 7px;
 
-  background: #111;
-  color: #fff;
+  background: var(--button-background);
+  color: var(--button-text);
 
   font-size: 14px;
   font-weight: 600;
+
   text-decoration: none;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .order-details-primary-button:hover {
-  background: #333;
+  background: var(--button-background-hover);
 }
+
+.order-details-primary-button:active {
+  transform: scale(0.98);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
 
 @media (max-width: 800px) {
   .order-details-layout {

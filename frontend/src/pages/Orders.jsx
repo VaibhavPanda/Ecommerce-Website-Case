@@ -56,8 +56,8 @@ function Orders() {
 
         <p>{error}</p>
 
-        <Link to="/products" className="orders-primary-button">
-          Continue Shopping
+        <Link to="/orders" className="orders-primary-button">
+          Try Again
         </Link>
       </main>
     );

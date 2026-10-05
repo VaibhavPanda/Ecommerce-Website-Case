@@ -24,7 +24,7 @@ public interface FavoriteRepository
       User user,
       Product product);
 
-      //fetch active products
+  //fetch active products
   @Query("""
       SELECT f
       FROM Favorite f

@@ -6,17 +6,19 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
 import com.example.backend.dto.error.ErrorResponse;
-import org.springframework.security.access.AccessDeniedException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+  //1
   @ExceptionHandler(ResourceNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleResourceNotFound(
       ResourceNotFoundException exception,
@@ -34,6 +36,7 @@ public class GlobalExceptionHandler {
         .body(error);
   }
 
+  //2
   @ExceptionHandler(ResourceAlreadyExistsException.class)
   public ResponseEntity<ErrorResponse> handleResourceAlreadyExists(
       ResourceAlreadyExistsException exception,
@@ -51,6 +54,7 @@ public class GlobalExceptionHandler {
         .body(error);
   }
 
+  //3
   @ExceptionHandler(InsufficientStockException.class)
   public ResponseEntity<ErrorResponse> handleInsufficientStock(
       InsufficientStockException exception,
@@ -68,6 +72,7 @@ public class GlobalExceptionHandler {
         .body(error);
   }
 
+  //4
   @ExceptionHandler(AccessDeniedException.class)
   public ResponseEntity<ErrorResponse> handleAccessDenied(
           AccessDeniedException exception,
@@ -86,6 +91,7 @@ public class GlobalExceptionHandler {
           .body(error);
   }
 
+  //5
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ErrorResponse> handleValidation(
       MethodArgumentNotValidException exception,

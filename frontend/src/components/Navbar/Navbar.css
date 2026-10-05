@@ -2,54 +2,119 @@
   position: relative;
   z-index: 100;
   width: 100%;
-  border-bottom: 1px solid #e5e5e5;
-  background: #fff;
+
+  border-bottom: 1px solid var(--border-color);
+  background: var(--surface-primary);
+
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease;
 }
 
 .navbar-container {
   width: 100%;
   max-width: 1400px;
   min-height: 68px;
+
   margin: 0 auto;
   padding: 0 32px;
+
   box-sizing: border-box;
+
   display: flex;
   align-items: center;
+
   gap: 30px;
+}
+
+.navbar-register-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  min-height: 36px;
+  padding: 0 12px;
+
+  border: 1px solid var(--button-border);
+  border-radius: 6px;
+
+  background: var(--button-background);
+  color: var(--button-text);
+
+  font-size: 13px;
+  font-weight: 600;
+
+  text-decoration: none;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar-register-button:hover {
+  background: var(--button-background-hover);
+  color: var(--button-text);
+
+  transform: translateY(-1px);
 }
 
 .navbar-brand {
   flex-shrink: 0;
-  color: #111;
+
+  color: var(--text-primary);
+
   text-decoration: none;
+
   font-size: 21px;
   font-weight: 700;
+
   white-space: nowrap;
+
+  transition: color 0.35s ease;
 }
 
 .navbar-links {
   min-width: 0;
+
   display: flex;
   align-items: center;
+
   gap: 21px;
+
   flex: 1;
 }
 
 .navbar-link {
   position: relative;
+
   display: inline-flex;
   align-items: center;
+
   gap: 7px;
+
   flex-shrink: 0;
-  color: #444;
+
+  color: var(--text-secondary);
+
   text-decoration: none;
+
   font-size: 14px;
+
   white-space: nowrap;
+
   transition: color 0.2s ease;
 }
 
 .navbar-link:hover {
-  color: #111;
+  color: var(--text-primary);
 }
 
 .navbar-link svg {
@@ -63,42 +128,65 @@
 
 .cart-badge {
   position: absolute;
+
   top: -10px;
   right: -13px;
+
   min-width: 18px;
   height: 18px;
+
   padding: 0 4px;
+
   box-sizing: border-box;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   border-radius: 999px;
-  background: #111;
-  color: #fff;
+
+  background: var(--text-primary);
+  color: var(--surface-primary);
+
   font-size: 10px;
   font-weight: 700;
+
   line-height: 1;
+
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease;
 }
 
 .navbar-user {
   display: flex;
   align-items: center;
+
   gap: 14px;
+
   flex-shrink: 0;
 }
 
 .navbar-user-info {
   max-width: 130px;
+
   display: flex;
   align-items: center;
+
   gap: 7px;
-  color: #444;
+
+  color: var(--text-secondary);
+
   font-size: 13px;
+
+  transition: color 0.35s ease;
 }
 
 .navbar-user-info span {
   overflow: hidden;
+
   text-overflow: ellipsis;
+
   white-space: nowrap;
 }
 
@@ -109,26 +197,38 @@
 
 .navbar-auth-button {
   min-height: 36px;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
   gap: 7px;
+
   padding: 0 13px;
-  border: 1px solid #222;
+
+  border: 1px solid var(--button-border);
+
   border-radius: 6px;
-  background: #111;
-  color: #fff;
+
+  background: var(--button-background);
+  color: var(--button-text);
+
   font-family: inherit;
+
   font-size: 13px;
   font-weight: 600;
+
   cursor: pointer;
+
   transition:
-    background 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
     transform 0.2s ease;
 }
 
 .navbar-auth-button:hover {
-  background: #333;
+  background: var(--button-background-hover);
 }
 
 .navbar-auth-button:active {
@@ -138,6 +238,14 @@
 .navbar-auth-button svg {
   font-size: 12px;
 }
+
+.navbar-dashboard-link {
+  font-weight: 600;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
 
 @media (max-width: 1100px) {
   .navbar-container {
@@ -158,10 +266,16 @@
   }
 }
 
+/* =========================================================
+   MOBILE NAVBAR
+   ========================================================= */
+
 @media (max-width: 900px) {
   .navbar-container {
     min-height: 62px;
+
     padding: 0 18px;
+
     gap: 18px;
   }
 
@@ -185,8 +299,11 @@
   .navbar-auth-button {
     width: 36px;
     height: 36px;
+
     min-height: 36px;
+
     padding: 0;
+
     border-radius: 50%;
   }
 
@@ -195,10 +312,16 @@
   }
 }
 
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
 @media (max-width: 650px) {
   .navbar-container {
     min-height: 58px;
+
     padding: 0 14px;
+
     gap: 12px;
   }
 
@@ -208,10 +331,15 @@
 
   .navbar-links {
     min-width: 0;
+
     overflow-x: auto;
+
     justify-content: flex-start;
+
     gap: 15px;
+
     padding: 4px 2px;
+
     scrollbar-width: none;
   }
 
@@ -222,6 +350,7 @@
   .navbar-link {
     width: 32px;
     height: 32px;
+
     justify-content: center;
   }
 
@@ -239,6 +368,10 @@
     right: -8px;
   }
 }
+
+/* =========================================================
+   VERY SMALL MOBILE
+   ========================================================= */
 
 @media (max-width: 430px) {
   .navbar-container {
@@ -266,5 +399,9 @@
   .navbar-auth-button {
     width: 32px;
     height: 32px;
+  }
+
+  .navbar-user {
+    gap: 8px;
   }
 }

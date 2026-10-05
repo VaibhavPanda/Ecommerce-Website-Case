@@ -31,6 +31,7 @@ function TenantCategories() {
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [error, setError] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const loadCategories = async () => {
     if (!tenantDomain) {
@@ -134,24 +135,26 @@ function TenantCategories() {
     }
   };
 
-  const handleDelete = async (categoryId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this category?",
-    );
+  const handleDelete = (category) => {
+    setDeleteTarget(category);
+  };
 
-    if (!confirmed) {
+  const confirmDelete = async () => {
+    if (!deleteTarget) {
       return;
     }
 
     try {
-      setDeletingId(categoryId);
+      setDeletingId(deleteTarget.id);
       setError("");
 
-      await deleteTenantCategory(tenantDomain, categoryId);
+      await deleteTenantCategory(tenantDomain, deleteTarget.id);
 
       setCategories((currentCategories) =>
-        currentCategories.filter((category) => category.id !== categoryId),
+        currentCategories.filter((category) => category.id !== deleteTarget.id),
       );
+
+      setDeleteTarget(null);
     } catch (error) {
       console.error("Failed to delete category:", error);
 
@@ -256,6 +259,15 @@ function TenantCategories() {
                       type="text"
                       value={editingName}
                       onChange={(event) => setEditingName(event.target.value)}
+                      onKeyDown = {(event) => {
+                        if(event.key === "Enter"){
+                          handleUpdate(category.id);
+                        }
+                        if(event.key === "Escape"){
+                          cancelEditing()
+                        }
+                      }}
+
                       maxLength={255}
                       autoFocus
                     />
@@ -308,7 +320,7 @@ function TenantCategories() {
                       <button
                         type="button"
                         className="tenant-category-delete-button"
-                        onClick={() => handleDelete(category.id)}
+                        onClick={() => handleDelete(category)}
                         disabled={deletingId === category.id}
                       >
                         <FontAwesomeIcon icon={faTrash} />
@@ -323,6 +335,54 @@ function TenantCategories() {
           </div>
         )}
       </section>
+      {deleteTarget && (
+        <div
+          className="tenant-categories-modal-overlay"
+          onClick={() => {
+            if (!deletingId) {
+              setDeleteTarget(null);
+            }
+          }}
+        >
+          <div
+            className="tenant-categories-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="tenant-categories-modal-icon">
+              <FontAwesomeIcon icon={faTrash} />
+            </div>
+
+            <h2>Delete category?</h2>
+
+            <p>
+              Are you sure you want to delete{" "}
+              <strong>{deleteTarget.name}</strong>?
+            </p>
+
+            <div className="tenant-categories-modal-actions">
+              <button
+                type="button"
+                className="tenant-categories-modal-cancel"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deletingId === deleteTarget.id}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="tenant-categories-modal-confirm"
+                onClick={confirmDelete}
+                disabled={deletingId === deleteTarget.id}
+              >
+                {deletingId === deleteTarget.id
+                  ? "Deleting..."
+                  : "Delete Category"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
